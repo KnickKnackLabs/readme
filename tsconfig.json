@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "jsx-md",
+    "paths": {
+      "jsx-md/jsx-runtime": ["./src/jsx-runtime.ts"],
+      "jsx-md/jsx-dev-runtime": ["./src/jsx-dev-runtime.ts"]
+    }
+  }
+}

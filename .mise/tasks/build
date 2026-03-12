@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+#MISE description="Generate README.md from README.tsx"
+#USAGE flag "--check" help="Check if README.md is up to date (exit 1 if stale)"
+set -e
+
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+
+# Generate markdown from TSX
+output=$(bun run "$REPO_DIR/README.tsx")
+
+if [[ "${usage_check}" == "true" ]]; then
+  # Compare with existing README.md
+  if [[ ! -f "$REPO_DIR/README.md" ]]; then
+    echo "README.md does not exist. Run 'readme build' to generate it."
+    exit 1
+  fi
+
+  if ! diff -u "$REPO_DIR/README.md" <(echo "$output") > /dev/null 2>&1; then
+    echo "README.md is out of date. Run 'readme build' to update it."
+    echo ""
+    diff -u "$REPO_DIR/README.md" <(echo "$output") || true
+    exit 1
+  fi
+
+  echo "README.md is up to date."
+  exit 0
+fi
+
+# Write output
+echo "$output" > "$REPO_DIR/README.md"
+echo "Generated README.md"
