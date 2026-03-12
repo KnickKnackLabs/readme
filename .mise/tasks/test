@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Run test suite"
+set -e
+
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+bun test "$REPO_DIR/src"
