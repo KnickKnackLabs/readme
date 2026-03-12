@@ -30,7 +30,7 @@ shiv install KnickKnackLabs/readme
 Create a `README.tsx` in your project root:
 
 ```tsx
-import { Heading, Paragraph, Bold, Section, CodeBlock } from "readme/src/components";
+import { Heading, Paragraph, Bold, Section, CodeBlock } from "./src/components";
 
 const readme = (
   <>
@@ -63,6 +63,7 @@ readme build --check      # Exit 1 if README.md is stale (for CI)
 | `<Italic>text</Italic>` | `*text*` |
 | `<Code>text</Code>` | `` `text` `` |
 | `<Link href="url">text</Link>` | `[text](url)` |
+| `<Image src="..." alt="..." />` | `![alt](src)` or HTML with width |
 | `<CodeBlock lang="bash">...</CodeBlock>` | Fenced code block |
 | `<Blockquote>text</Blockquote>` | `> text` |
 | `<Badge label=... value=... />` | shields.io badge |

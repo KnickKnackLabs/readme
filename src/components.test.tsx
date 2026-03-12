@@ -189,6 +189,17 @@ describe("Badge", () => {
     expect(result).toContain("logo=swift");
     expect(result).toContain("logoColor=white");
   });
+
+  test("escapes dashes for shields.io", () => {
+    const result = <Badge label="x" value="foo-bar" color="blue" />;
+    expect(result).toContain("foo--bar");
+    expect(result).not.toMatch(/foo-bar-blue/);
+  });
+
+  test("escapes underscores for shields.io", () => {
+    const result = <Badge label="x" value="foo_bar" color="blue" />;
+    expect(result).toContain("foo__bar");
+  });
 });
 
 describe("Badges", () => {

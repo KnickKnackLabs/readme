@@ -49,7 +49,7 @@ const readme = (
         Create a <Code>README.tsx</Code> in your project root:
       </Paragraph>
 
-      <CodeBlock lang="tsx">{`import { Heading, Paragraph, Bold, Section, CodeBlock } from "readme/src/components";
+      <CodeBlock lang="tsx">{`import { Heading, Paragraph, Bold, Section, CodeBlock } from "./src/components";
 
 const readme = (
   <>
@@ -99,6 +99,10 @@ readme build --check      # Exit 1 if README.md is stale (for CI)`}</CodeBlock>
         <TableRow>
           <Cell><Code>{'<Link href="url">text</Link>'}</Code></Cell>
           <Cell><Code>[text](url)</Code></Cell>
+        </TableRow>
+        <TableRow>
+          <Cell><Code>{'<Image src="..." alt="..." />'}</Code></Cell>
+          <Cell><Code>![alt](src)</Code> or HTML with width</Cell>
         </TableRow>
         <TableRow>
           <Cell><Code>{'<CodeBlock lang="bash">...</CodeBlock>'}</Code></Cell>

@@ -15,9 +15,10 @@ if [[ "${usage_check}" == "true" ]]; then
     exit 1
   fi
 
-  current=$(cat "$REPO_DIR/README.md")
-  if [[ "$output" != "$current" ]]; then
+  if ! diff -u "$REPO_DIR/README.md" <(echo "$output") > /dev/null 2>&1; then
     echo "README.md is out of date. Run 'readme build' to update it."
+    echo ""
+    diff -u "$REPO_DIR/README.md" <(echo "$output") || true
     exit 1
   fi
 
