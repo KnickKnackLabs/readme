@@ -1,3 +1,8 @@
+// Bun's --tsconfig-override flag is broken (oven-sh/bun#22023), so when this
+// file lives outside the readme repo, auto-discovery won't find the right
+// tsconfig. The pragma below ensures our custom JSX runtime is used regardless.
+/** @jsxImportSource jsx-md */
+
 import {
   Heading, Paragraph, CodeBlock, Blockquote, LineBreak, HR,
   Bold, Code, Link,

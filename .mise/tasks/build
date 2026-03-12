@@ -4,21 +4,45 @@
 set -e
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+TARGET_DIR="${CALLER_PWD:-$REPO_DIR}"
+
+# Bun's --tsconfig-override is broken for jsxImportSource (oven-sh/bun#22023),
+# but it does work for paths. So we split the responsibility:
+#   - Each README.tsx uses a /** @jsxImportSource jsx-md */ pragma
+#   - This override tsconfig handles module resolution only (paths)
+TSCONFIG=$(mktemp)
+cat > "$TSCONFIG" <<CONF
+{
+  "compilerOptions": {
+    "paths": {
+      "jsx-md/jsx-runtime": ["$REPO_DIR/src/jsx-runtime.ts"],
+      "jsx-md/jsx-dev-runtime": ["$REPO_DIR/src/jsx-dev-runtime.ts"],
+      "readme/*": ["$REPO_DIR/*"]
+    }
+  }
+}
+CONF
+trap 'rm -f "$TSCONFIG"' EXIT
+
+if [[ ! -f "$TARGET_DIR/README.tsx" ]]; then
+  echo "No README.tsx found in $TARGET_DIR"
+  exit 1
+fi
 
 # Generate markdown from TSX
-output=$(bun run "$REPO_DIR/README.tsx")
+# Filter the spurious "directory mismatch" warning from oven-sh/bun#22023
+output=$(bun run --tsconfig-override "$TSCONFIG" "$TARGET_DIR/README.tsx" 2> >(grep -v "Internal error: directory mismatch" >&2))
 
 if [[ "${usage_check}" == "true" ]]; then
-  # Compare with existing README.md
-  if [[ ! -f "$REPO_DIR/README.md" ]]; then
+  if [[ ! -f "$TARGET_DIR/README.md" ]]; then
     echo "README.md does not exist. Run 'readme build' to generate it."
     exit 1
   fi
 
-  if ! diff -u "$REPO_DIR/README.md" <(echo "$output") > /dev/null 2>&1; then
+  if ! diff -u "$TARGET_DIR/README.md" <(echo "$output") > /dev/null 2>&1; then
     echo "README.md is out of date. Run 'readme build' to update it."
     echo ""
-    diff -u "$REPO_DIR/README.md" <(echo "$output") || true
+    diff -u "$TARGET_DIR/README.md" <(echo "$output") || true
     exit 1
   fi
 
@@ -27,5 +51,5 @@ if [[ "${usage_check}" == "true" ]]; then
 fi
 
 # Write output
-echo "$output" > "$REPO_DIR/README.md"
+echo "$output" > "$TARGET_DIR/README.md"
 echo "Generated README.md"
