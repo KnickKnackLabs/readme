@@ -5,7 +5,7 @@ import {
   List, Item,
   Table, TableHead, TableRow, Cell,
   Center, Details,
-  Raw, Sub, Align, HtmlTable, HtmlTr, HtmlTd,
+  Raw, HtmlLink, Sub, Align, HtmlTable, HtmlTr, HtmlTd,
   Badge, Badges,
   Section,
 } from "./components";
@@ -175,6 +175,12 @@ describe("Details", () => {
 describe("Raw", () => {
   test("passes content through unchanged", () => {
     expect(<Raw>{'<div class="custom">hello</div>'}</Raw>).toBe('<div class="custom">hello</div>');
+  });
+});
+
+describe("HtmlLink", () => {
+  test("renders an anchor tag", () => {
+    expect(<HtmlLink href="https://example.com">click</HtmlLink>).toBe('<a href="https://example.com">click</a>');
   });
 });
 

@@ -120,6 +120,10 @@ export function Raw({ children: c }: { children?: string | string[] }) {
   return flatten(c);
 }
 
+export function HtmlLink({ href, children: c }: { href: string; children: string }) {
+  return `<a href="${href}">${c}</a>`;
+}
+
 export function Sub({ children: c }: { children?: string | string[] }) {
   return `<sub>\n${flatten(c)}\n</sub>`;
 }
