@@ -5,6 +5,7 @@ import {
   List, Item,
   Table, TableHead, TableRow, Cell,
   Center, Details,
+  Raw, Sub, Align, HtmlTable, HtmlTr, HtmlTd,
   Badge, Badges,
   Section,
 } from "./components";
@@ -169,6 +170,46 @@ describe("Details", () => {
   });
 });
 
+// --- HTML passthrough ---
+
+describe("Raw", () => {
+  test("passes content through unchanged", () => {
+    expect(<Raw>{'<div class="custom">hello</div>'}</Raw>).toBe('<div class="custom">hello</div>');
+  });
+});
+
+describe("Sub", () => {
+  test("wraps in sub tags", () => {
+    expect(<Sub>small text</Sub>).toBe("<sub>\nsmall text\n</sub>");
+  });
+});
+
+describe("Align", () => {
+  test("defaults to center alignment", () => {
+    const result = <Align><Image src="test.png" alt="test" width={400} /></Align>;
+    expect(result).toContain('align="center"');
+    expect(result).toContain('<img src="test.png"');
+  });
+});
+
+describe("HtmlTable", () => {
+  test("renders two-column layout", () => {
+    const result = (
+      <HtmlTable>
+        <HtmlTr>
+          <HtmlTd width="50%"><Paragraph>Left</Paragraph></HtmlTd>
+          <HtmlTd width="50%"><Paragraph>Right</Paragraph></HtmlTd>
+        </HtmlTr>
+      </HtmlTable>
+    );
+    expect(result).toContain("<table>");
+    expect(result).toContain('width="50%"');
+    expect(result).toContain("Left");
+    expect(result).toContain("Right");
+    expect(result).toContain("</table>");
+  });
+});
+
 // --- Badges ---
 
 describe("Badge", () => {
@@ -261,5 +302,30 @@ describe("composition", () => {
       </Center>
     );
     expect(result).toBe('<div align="center">\n\n## License\n\nMIT\n\n</div>\n\n');
+  });
+
+  test("map() inside table produces clean rows (no stray commas)", () => {
+    const items = [{ name: "a", desc: "first" }, { name: "b", desc: "second" }];
+    const result = (
+      <Table>
+        <TableHead>
+          <Cell>Name</Cell>
+          <Cell>Desc</Cell>
+        </TableHead>
+        {items.map(i => (
+          <TableRow>
+            <Cell>{i.name}</Cell>
+            <Cell>{i.desc}</Cell>
+          </TableRow>
+        ))}
+      </Table>
+    );
+    expect(result).not.toContain(",|");
+    expect(result).toBe(
+      "| Name | Desc |\n" +
+      "| --- | --- |\n" +
+      "| a | first |\n" +
+      "| b | second |\n\n"
+    );
   });
 });
