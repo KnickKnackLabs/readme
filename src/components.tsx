@@ -6,10 +6,10 @@
 
 // --- Helpers ---
 
-function flatten(c: string | string[] | undefined): string {
-  if (!c) return "";
-  if (Array.isArray(c)) return c.join("");
-  return c;
+function flatten(c: any): string {
+  if (c == null) return "";
+  if (Array.isArray(c)) return c.map(flatten).join("");
+  return String(c);
 }
 
 function shieldsEncode(s: string): string {
@@ -112,6 +112,36 @@ export function Center({ children: c }: { children?: string | string[] }) {
 
 export function Details({ summary, children: c }: { summary: string; children?: string | string[] }) {
   return `<details>\n<summary><b>${summary}</b></summary>\n\n${flatten(c)}</details>\n\n`;
+}
+
+// --- HTML passthrough ---
+
+export function Raw({ children: c }: { children?: string | string[] }) {
+  return flatten(c);
+}
+
+export function Sub({ children: c }: { children?: string | string[] }) {
+  return `<sub>\n${flatten(c)}\n</sub>`;
+}
+
+export function Align({ align = "center", children: c }: { align?: string; children?: string | string[] }) {
+  return `<p align="${align}">\n  ${flatten(c)}\n</p>\n\n`;
+}
+
+export function HtmlTable({ children: c }: { children?: string | string[] }) {
+  return `<table>\n${flatten(c)}</table>\n\n`;
+}
+
+export function HtmlTr({ children: c }: { children?: string | string[] }) {
+  return `  <tr>\n${flatten(c)}  </tr>\n`;
+}
+
+export function HtmlTd({ width, valign, children: c }: { width?: string; valign?: string; children?: string | string[] }) {
+  const attrs = [
+    width ? `width="${width}"` : "",
+    valign ? `valign="${valign}"` : "",
+  ].filter(Boolean).join(" ");
+  return `    <td${attrs ? ` ${attrs}` : ""}>\n\n${flatten(c)}\n</td>\n`;
 }
 
 // --- Badges ---

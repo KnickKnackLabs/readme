@@ -15,8 +15,12 @@ export function jsx(
 
 export const jsxs = jsx;
 
-export function Fragment({ children }: { children?: string | string[] }): string {
-  if (!children) return "";
-  if (Array.isArray(children)) return children.join("");
-  return children;
+function flatten(c: any): string {
+  if (c == null) return "";
+  if (Array.isArray(c)) return c.map(flatten).join("");
+  return String(c);
+}
+
+export function Fragment({ children }: { children?: any }): string {
+  return flatten(children);
 }
