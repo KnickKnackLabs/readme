@@ -129,7 +129,7 @@ hook_file() {
 
 @test "install: hook checks for staged README.tsx" {
   run_install "true"
-  grep -qF "README" "$(hook_file)" && grep -qF ".tsx" "$(hook_file)"
+  grep -q 'README.*tsx' "$(hook_file)"
 }
 
 # ============================================================================
