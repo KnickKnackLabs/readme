@@ -158,6 +158,19 @@ MOCK
   [ "$count" -eq 1 ]
 }
 
+@test "install: idempotent — does not switch modes without remove" {
+  run_install "true"
+  grep -q "git add README.md" "$(hook_file)"
+
+  # Try to install check mode without removing first
+  run run_install "false" "true"
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -q "already installed"
+
+  # Hook should still be in build mode
+  grep -q "git add README.md" "$(hook_file)"
+}
+
 # ============================================================================
 # Append to existing hook
 # ============================================================================
@@ -325,6 +338,7 @@ TSX
   # Commit should fail because README.md is stale
   run bash -c "cd '$TEST_REPO' && git commit -m 'should fail'"
   [ "$status" -ne 0 ]
+  echo "$output" | grep -q "out of date"
 
   # README.md should still have the old content
   grep -q "Hello" "$TEST_REPO/README.md"
