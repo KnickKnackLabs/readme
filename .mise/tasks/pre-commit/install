@@ -37,7 +37,11 @@ mkdir -p "$HOOK_DIR"
 
 # Generate the hook block
 if [ "$BUILD" = "true" ]; then
-  HOOK_BODY='    readme build
+  HOOK_BODY='    readme build || {
+      echo ""
+      echo "readme build failed — commit aborted."
+      exit 1
+    }
     git add README.md'
 else
   HOOK_BODY='    readme build --check || {
