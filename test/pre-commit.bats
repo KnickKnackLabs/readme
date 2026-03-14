@@ -6,11 +6,8 @@ INSTALL_TASK="$REPO_DIR/.mise/tasks/pre-commit/install"
 REMOVE_TASK="$REPO_DIR/.mise/tasks/pre-commit/remove"
 
 setup() {
-  export TEST_HOME="$BATS_TMPDIR/readme-test-$$"
-  mkdir -p "$TEST_HOME"
-
   # Create a temporary git repo to test in
-  export TEST_REPO="$TEST_HOME/project"
+  export TEST_REPO="$BATS_TEST_TMPDIR/project"
   mkdir -p "$TEST_REPO"
   git -C "$TEST_REPO" init -q -b main
   git -C "$TEST_REPO" config user.email "test@test.com"
@@ -18,10 +15,6 @@ setup() {
   touch "$TEST_REPO/file.txt"
   git -C "$TEST_REPO" add .
   git -C "$TEST_REPO" commit -q -m "init"
-}
-
-teardown() {
-  rm -rf "$TEST_HOME"
 }
 
 # Helper: run install task targeting the test repo
@@ -38,6 +31,21 @@ run_remove() {
 
 hook_file() {
   echo "$TEST_REPO/.git/hooks/pre-commit"
+}
+
+# Helper: put a mock `readme` on PATH that delegates to mise
+# This lets integration tests use the real installed hook (which calls `readme`)
+# without depending on the shiv shim being installed.
+setup_readme_on_path() {
+  local mock_bin="$BATS_TEST_TMPDIR/mock-bin"
+  mkdir -p "$mock_bin"
+  cat > "$mock_bin/readme" <<MOCK
+#!/usr/bin/env bash
+export CALLER_PWD="\$PWD"
+exec mise -C "$REPO_DIR" run -q "\$@"
+MOCK
+  chmod +x "$mock_bin/readme"
+  export PATH="$mock_bin:$PATH"
 }
 
 # ============================================================================
@@ -247,6 +255,8 @@ HOOK
 # ============================================================================
 
 @test "integration: build mode rebuilds README.md on commit" {
+  setup_readme_on_path
+
   # Set up a minimal README.tsx
   cat > "$TEST_REPO/README.tsx" <<'TSX'
 /** @jsxImportSource jsx-md */
@@ -255,24 +265,13 @@ const readme = <Heading level={1}>Hello</Heading>;
 console.log(readme);
 TSX
 
-  # Build initial README.md
-  CALLER_PWD="$TEST_REPO" mise -C "$REPO_DIR" run -q build
+  # Build initial README.md and commit
+  (cd "$TEST_REPO" && readme build)
   git -C "$TEST_REPO" add .
   git -C "$TEST_REPO" commit -q -m "add readme"
 
-  # Install hook in build mode — use a wrapper so the hook calls mise directly
-  mkdir -p "$TEST_REPO/.git/hooks"
-  cat > "$(hook_file)" <<HOOK
-#!/usr/bin/env bash
-if git diff --cached --name-only | grep -q '^README\\.tsx\$'; then
-    CALLER_PWD="\$PWD" mise -C "$REPO_DIR" run -q build || {
-      echo "readme build failed — commit aborted."
-      exit 1
-    }
-    git add README.md
-fi
-HOOK
-  chmod +x "$(hook_file)"
+  # Install hook via the actual install task
+  run_install "true"
 
   # Modify README.tsx
   cat > "$TEST_REPO/README.tsx" <<'TSX'
@@ -284,7 +283,7 @@ TSX
 
   # Stage only the TSX, commit — hook should rebuild and stage README.md
   git -C "$TEST_REPO" add README.tsx
-  git -C "$TEST_REPO" commit -q -m "update readme"
+  (cd "$TEST_REPO" && git commit -q -m "update readme")
 
   # Verify README.md was updated
   grep -q "Updated" "$TEST_REPO/README.md"
@@ -295,6 +294,8 @@ TSX
 # ============================================================================
 
 @test "integration: check mode blocks commit with stale README.md" {
+  setup_readme_on_path
+
   # Set up a minimal README.tsx
   cat > "$TEST_REPO/README.tsx" <<'TSX'
 /** @jsxImportSource jsx-md */
@@ -303,24 +304,13 @@ const readme = <Heading level={1}>Hello</Heading>;
 console.log(readme);
 TSX
 
-  # Build initial README.md
-  CALLER_PWD="$TEST_REPO" mise -C "$REPO_DIR" run -q build
+  # Build initial README.md and commit
+  (cd "$TEST_REPO" && readme build)
   git -C "$TEST_REPO" add .
   git -C "$TEST_REPO" commit -q -m "add readme"
 
-  # Install hook in check mode — use mise directly
-  mkdir -p "$TEST_REPO/.git/hooks"
-  cat > "$(hook_file)" <<HOOK
-#!/usr/bin/env bash
-if git diff --cached --name-only | grep -q '^README\\.tsx\$'; then
-    CALLER_PWD="\$PWD" mise -C "$REPO_DIR" run -q build -- --check || {
-      echo ""
-      echo "README.md is out of date. Run 'readme build' to update it."
-      exit 1
-    }
-fi
-HOOK
-  chmod +x "$(hook_file)"
+  # Install hook via the actual install task
+  run_install "false" "true"
 
   # Modify README.tsx without rebuilding
   cat > "$TEST_REPO/README.tsx" <<'TSX'
@@ -333,7 +323,7 @@ TSX
   git -C "$TEST_REPO" add README.tsx
 
   # Commit should fail because README.md is stale
-  run git -C "$TEST_REPO" commit -m "should fail"
+  run bash -c "cd '$TEST_REPO' && git commit -m 'should fail'"
   [ "$status" -ne 0 ]
 
   # README.md should still have the old content
