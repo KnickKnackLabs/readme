@@ -4,3 +4,4 @@ set -e
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 bun test "$REPO_DIR/src"
+bats "$REPO_DIR/test"
