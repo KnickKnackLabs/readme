@@ -1,10 +1,21 @@
 #!/usr/bin/env bash
 #MISE description="Install a git pre-commit hook that keeps README.md in sync"
-#USAGE flag "--check" help="Error on stale README instead of rebuilding"
+#USAGE flag "--build" help="Auto-rebuild and stage README.md on commit"
+#USAGE flag "--check" help="Error if README.md is stale on commit"
 set -e
 
 TARGET_DIR="${CALLER_PWD:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}"
+BUILD="${usage_build:-false}"
 CHECK="${usage_check:-false}"
+
+# Require exactly one mode
+if [ "$BUILD" = "$CHECK" ]; then
+  echo "Usage: readme pre-commit:install --build | --check" >&2
+  echo "" >&2
+  echo "  --build  Auto-rebuild and stage README.md on commit" >&2
+  echo "  --check  Error if README.md is stale on commit" >&2
+  exit 1
+fi
 
 # Must be inside a git repo
 HOOK_DIR=$(git -C "$TARGET_DIR" rev-parse --absolute-git-dir 2>/dev/null)/hooks || {
@@ -25,15 +36,15 @@ fi
 mkdir -p "$HOOK_DIR"
 
 # Generate the hook block
-if [ "$CHECK" = "true" ]; then
+if [ "$BUILD" = "true" ]; then
+  HOOK_BODY='    readme build
+    git add README.md'
+else
   HOOK_BODY='    readme build --check || {
       echo ""
       echo "README.md is out of date. Run '\''readme build'\'' to update it."
       exit 1
     }'
-else
-  HOOK_BODY='    readme build
-    git add README.md'
 fi
 
 HOOK_BLOCK="$BEGIN_MARKER
@@ -51,8 +62,8 @@ fi
 
 chmod +x "$HOOK_FILE"
 
-if [ "$CHECK" = "true" ]; then
-  echo "Installed pre-commit hook (check mode — will error if README.md is stale)"
-else
+if [ "$BUILD" = "true" ]; then
   echo "Installed pre-commit hook (build mode — will rebuild and stage README.md)"
+else
+  echo "Installed pre-commit hook (check mode — will error if README.md is stale)"
 fi
