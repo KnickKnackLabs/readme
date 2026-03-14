@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+#MISE description="Remove the readme pre-commit hook"
+set -e
+
+TARGET_DIR="${CALLER_PWD:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}"
+
+HOOK_DIR=$(git -C "$TARGET_DIR" rev-parse --absolute-git-dir 2>/dev/null)/hooks || {
+  echo "Error: not a git repository" >&2
+  exit 1
+}
+
+HOOK_FILE="$HOOK_DIR/pre-commit"
+
+BEGIN_MARKER="# --- readme pre-commit hook begin ---"
+END_MARKER="# --- readme pre-commit hook end ---"
+
+if [ ! -f "$HOOK_FILE" ] || ! grep -q "$BEGIN_MARKER" "$HOOK_FILE" 2>/dev/null; then
+  echo "No readme hook found."
+  exit 0
+fi
+
+# Remove the hook block (begin marker through end marker, plus surrounding blank lines)
+tmp=$(mktemp)
+awk "
+  /$BEGIN_MARKER/ { skip=1; next }
+  /$END_MARKER/   { skip=0; next }
+  !skip           { print }
+" "$HOOK_FILE" > "$tmp"
+
+# If only the shebang (or nothing) remains, remove the file entirely
+content=$(grep -v '^[[:space:]]*$' "$tmp" || true)
+if [ -z "$content" ] || [ "$content" = "#!/usr/bin/env bash" ]; then
+  rm "$HOOK_FILE"
+  rm "$tmp"
+  echo "Removed pre-commit hook (no other hooks remained, file deleted)"
+else
+  mv "$tmp" "$HOOK_FILE"
+  chmod +x "$HOOK_FILE"
+  echo "Removed readme hook (other hooks preserved)"
+fi
