@@ -88,7 +88,7 @@ Auto-generated from `components.tsx` exports. Each component carries a `.meta` p
 | `<Table>...</Table>` | GFM table wrapper |
 | `<TableHead><Cell>...</Cell></TableHead>` | Header row + separator |
 | `<TableRow><Cell>...</Cell></TableRow>` | Table data row |
-| `box(lines, { style, padding })` | ASCII or Unicode box around text |
+| `box(lines, { style, padding })` | ASCII or Unicode box around text (string[]) |
 | `labeledBox(title, body, status)` | Box with title, body, and status |
 | `sideBySide(columns, gap)` | Place line arrays side by side |
 

@@ -342,46 +342,49 @@ describe("composition", () => {
 describe("box", () => {
   test("draws ASCII box by default", () => {
     const result = box(["hello"]);
-    expect(result).toBe(
-      "+-------+\n" +
-      "| hello |\n" +
-      "+-------+"
-    );
+    expect(result).toEqual([
+      "+-------+",
+      "| hello |",
+      "+-------+",
+    ]);
   });
 
   test("draws Unicode box with style option", () => {
     const result = box(["hello"], { style: "unicode" });
-    expect(result).toBe(
-      "┌───────┐\n" +
-      "│ hello │\n" +
-      "└───────┘"
-    );
+    expect(result).toEqual([
+      "┌───────┐",
+      "│ hello │",
+      "└───────┘",
+    ]);
   });
 
   test("pads lines to equal width", () => {
     const result = box(["hi", "longer"]);
-    expect(result).toBe(
-      "+--------+\n" +
-      "| hi     |\n" +
-      "| longer |\n" +
-      "+--------+"
-    );
+    expect(result).toEqual([
+      "+--------+",
+      "| hi     |",
+      "| longer |",
+      "+--------+",
+    ]);
   });
 
   test("respects custom padding", () => {
     const result = box(["hi"], { padding: 3 });
-    expect(result).toBe(
-      "+--------+\n" +
-      "|   hi   |\n" +
-      "+--------+"
-    );
+    expect(result).toEqual([
+      "+--------+",
+      "|   hi   |",
+      "+--------+",
+    ]);
   });
 
   test("handles empty lines", () => {
     const result = box(["a", "", "b"]);
-    const lines = result.split("\n");
-    expect(lines).toHaveLength(5); // top + 3 content + bottom
-    expect(lines[2]).toBe("|   |"); // empty line gets padded to max width
+    expect(result).toHaveLength(5); // top + 3 content + bottom
+    expect(result[2]).toBe("|   |"); // empty line gets padded to max width
+  });
+
+  test("returns empty array for empty input", () => {
+    expect(box([])).toEqual([]);
   });
 });
 
@@ -443,5 +446,9 @@ describe("sideBySide", () => {
     // Every line should have the same length
     const lengths = new Set(result.map(l => l.length));
     expect(lengths.size).toBe(1);
+  });
+
+  test("returns empty array for empty input", () => {
+    expect(sideBySide([])).toEqual([]);
   });
 });

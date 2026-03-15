@@ -234,24 +234,26 @@ const BOX_CHARS = {
 
 /**
  * Draw a box around lines of text, auto-sized to content.
- * Returns a multi-line string.
+ * Returns an array of lines (consistent with labeledBox, composable with sideBySide).
  */
-export function box(lines: string[], { padding = 1, style = "ascii" as BoxStyle } = {}): string {
+export function box(lines: string[], { padding = 1, style = "ascii" as BoxStyle } = {}): string[] {
+  if (!lines.length) return [];
   const c = BOX_CHARS[style];
   const maxLen = Math.max(...lines.map((l) => l.length));
   const w = maxLen + padding * 2;
   const pad = (s: string) => " ".repeat(padding) + s + " ".repeat(w - s.length - padding);
   const top = c.tl + c.h.repeat(w) + c.tr;
   const bot = c.bl + c.h.repeat(w) + c.br;
-  return [top, ...lines.map((l) => c.v + pad(l) + c.v), bot].join("\n");
+  return [top, ...lines.map((l) => c.v + pad(l) + c.v), bot];
 }
-box.meta = { usage: "box(lines, { style, padding })", output: "ASCII or Unicode box around text" } satisfies ComponentMeta;
+box.meta = { usage: "box(lines, { style, padding })", output: "ASCII or Unicode box around text (string[])" } satisfies ComponentMeta;
 
 /**
  * Draw a labeled box with a title, body lines, and a status line.
  * Returns an array of lines (for use with sideBySide).
  */
 export function labeledBox(title: string, body: string[], status: string, { style = "ascii" as BoxStyle } = {}): string[] {
+  if (!body.length) body = [""];
   const c = BOX_CHARS[style];
   const maxLen = Math.max(title.length, ...body.map((l) => l.length), status.length);
   const w = maxLen + 2;
@@ -273,6 +275,7 @@ labeledBox.meta = { usage: "labeledBox(title, body, status)", output: "Box with 
  * Useful for placing multiple labeledBox results next to each other.
  */
 export function sideBySide(columns: string[][], gap = 2): string[] {
+  if (!columns.length) return [];
   const maxHeight = Math.max(...columns.map((c) => c.length));
   const widths = columns.map((c) => Math.max(...c.map((l) => l.length)));
   const result: string[] = [];
