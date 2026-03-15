@@ -55,7 +55,7 @@ readme build --check      # Exit 1 if README.md is stale (for CI)
 
 ## Components (32)
 
-Auto-generated from `components.tsx` exports. Each component carries a `.meta` property describing its usage.
+Auto-generated from `src/components/` exports. Each component carries a `.meta` property describing its usage.
 
 | Component | Output |
 | --- | --- |

@@ -21,7 +21,7 @@ const componentRows = Object.entries(allComponents)
   .map(([name, value]) => {
     const meta = (value as any)?.meta as ComponentMeta | undefined;
     if (meta) return { name, ...meta };
-    console.error(`warning: export "${name}" has no .meta — add it to components.tsx`);
+    console.error(`warning: export "${name}" has no .meta — add .meta to the component in src/components/`);
     return { name, usage: name, output: "⚠️ undocumented" };
   });
 
@@ -92,7 +92,7 @@ readme build --check      # Exit 1 if README.md is stale (for CI)`}</CodeBlock>
     <Section title={`Components (${componentRows.length})`}>
       <Paragraph>
         {"Auto-generated from "}
-        <Code>components.tsx</Code>
+        <Code>src/components/</Code>
         {" exports. Each component carries a "}
         <Code>.meta</Code>
         {" property describing its usage."}
