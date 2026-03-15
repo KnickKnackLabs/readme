@@ -53,24 +53,44 @@ readme build              # README.tsx → README.md
 readme build --check      # Exit 1 if README.md is stale (for CI)
 ```
 
-## Components
+## Components (32)
+
+Auto-generated from `components.tsx` exports. Each component carries a `.meta` property describing its usage.
 
 | Component | Output |
 | --- | --- |
-| `<Heading level={2}>Title</Heading>` | `## Title` |
-| `<Paragraph>Text</Paragraph>` | Text block with trailing blank line |
-| `<Bold>text</Bold>` | `**text**` |
-| `<Italic>text</Italic>` | `*text*` |
-| `<Code>text</Code>` | `` `text` `` |
-| `<Link href="url">text</Link>` | `[text](url)` |
-| `<Image src="..." alt="..." />` | `![alt](src)` or HTML with width |
-| `<CodeBlock lang="bash">...</CodeBlock>` | Fenced code block |
-| `<Blockquote>text</Blockquote>` | `> text` |
+| `<Align align="center">...</Align>` | <p align="..."> |
 | `<Badge label=... value=... />` | shields.io badge |
+| `<Badges>...</Badges>` | Badge row with spacing |
+| `<Blockquote>text</Blockquote>` | > text |
+| `<Bold>text</Bold>` | **text** |
+| `<Cell>text</Cell>` | Table cell content |
 | `<Center>...</Center>` | <div align="center"> |
+| `<Code>text</Code>` | `` `text` `` |
+| `<CodeBlock lang="bash">...</CodeBlock>` | Fenced code block |
 | `<Details summary=...>...</Details>` | Collapsible section |
-| `<Table> + <TableHead> + <TableRow>` | GFM table |
+| `<HR />` | --- |
+| `<Heading level={2}>Title</Heading>` | ## Title |
+| `<HtmlLink href="url">text</HtmlLink>` | <a> tag |
+| `<HtmlTable>...</HtmlTable>` | <table> for layout |
+| `<HtmlTd width=... valign=...>` | <td> cell with optional sizing |
+| `<HtmlTr>...</HtmlTr>` | <tr> row |
+| `<Image src="..." alt="..." />` | ![alt](src) or HTML with width |
+| `<Italic>text</Italic>` | *text* |
+| `<Item>text</Item>` | List item content |
+| `<LineBreak />` | <br /> |
+| `<Link href="url">text</Link>` | [text](url) |
+| `<List><Item>...</Item></List>` | Bulleted or numbered list |
+| `<Paragraph>Text</Paragraph>` | Text with trailing blank line |
+| `<Raw>html</Raw>` | HTML passthrough |
 | `<Section title=... level=...>` | Heading + content block |
+| `<Sub>text</Sub>` | <sub> tag |
+| `<Table>...</Table>` | GFM table wrapper |
+| `<TableHead><Cell>...</Cell></TableHead>` | Header row + separator |
+| `<TableRow><Cell>...</Cell></TableRow>` | Table data row |
+| `box(lines, { style, padding })` | ASCII or Unicode box around text (string[]) |
+| `labeledBox(title, body, status)` | Box with title, body, and status |
+| `sideBySide(columns, gap)` | Place line arrays side by side |
 
 ## Why JSX?
 

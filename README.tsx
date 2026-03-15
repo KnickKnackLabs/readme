@@ -11,6 +11,20 @@ import {
   List, Item,
 } from "./src/components";
 
+import type { ComponentMeta } from "./src/components";
+import * as allComponents from "./src/components";
+
+// Build component reference from exports — each export with .meta is documented,
+// those without are shown with a warning
+const componentRows = Object.entries(allComponents)
+  .filter(([name]) => name !== "ComponentMeta") // skip the type re-export
+  .map(([name, value]) => {
+    const meta = (value as any)?.meta as ComponentMeta | undefined;
+    if (meta) return { name, ...meta };
+    console.error(`warning: export "${name}" has no .meta — add it to components.tsx`);
+    return { name, usage: name, output: "⚠️ undocumented" };
+  });
+
 const readme = (
   <>
     <Center>
@@ -75,68 +89,26 @@ console.log(readme);`}</CodeBlock>
 readme build --check      # Exit 1 if README.md is stale (for CI)`}</CodeBlock>
     </Section>
 
-    <Section title="Components">
+    <Section title={`Components (${componentRows.length})`}>
+      <Paragraph>
+        {"Auto-generated from "}
+        <Code>components.tsx</Code>
+        {" exports. Each component carries a "}
+        <Code>.meta</Code>
+        {" property describing its usage."}
+      </Paragraph>
+
       <Table>
         <TableHead>
           <Cell>Component</Cell>
           <Cell>Output</Cell>
         </TableHead>
-        <TableRow>
-          <Cell><Code>{"<Heading level={2}>Title</Heading>"}</Code></Cell>
-          <Cell><Code>## Title</Code></Cell>
-        </TableRow>
-        <TableRow>
-          <Cell><Code>{"<Paragraph>Text</Paragraph>"}</Code></Cell>
-          <Cell>Text block with trailing blank line</Cell>
-        </TableRow>
-        <TableRow>
-          <Cell><Code>{"<Bold>text</Bold>"}</Code></Cell>
-          <Cell><Code>**text**</Code></Cell>
-        </TableRow>
-        <TableRow>
-          <Cell><Code>{"<Italic>text</Italic>"}</Code></Cell>
-          <Cell><Code>*text*</Code></Cell>
-        </TableRow>
-        <TableRow>
-          <Cell><Code>{"<Code>text</Code>"}</Code></Cell>
-          <Cell>`` `text` ``</Cell>
-        </TableRow>
-        <TableRow>
-          <Cell><Code>{'<Link href="url">text</Link>'}</Code></Cell>
-          <Cell><Code>[text](url)</Code></Cell>
-        </TableRow>
-        <TableRow>
-          <Cell><Code>{'<Image src="..." alt="..." />'}</Code></Cell>
-          <Cell><Code>![alt](src)</Code> or HTML with width</Cell>
-        </TableRow>
-        <TableRow>
-          <Cell><Code>{'<CodeBlock lang="bash">...</CodeBlock>'}</Code></Cell>
-          <Cell>Fenced code block</Cell>
-        </TableRow>
-        <TableRow>
-          <Cell><Code>{"<Blockquote>text</Blockquote>"}</Code></Cell>
-          <Cell><Code>{"> text"}</Code></Cell>
-        </TableRow>
-        <TableRow>
-          <Cell><Code>{"<Badge label=... value=... />"}</Code></Cell>
-          <Cell>shields.io badge</Cell>
-        </TableRow>
-        <TableRow>
-          <Cell><Code>{"<Center>...</Center>"}</Code></Cell>
-          <Cell>{'<div align="center">'}</Cell>
-        </TableRow>
-        <TableRow>
-          <Cell><Code>{"<Details summary=...>...</Details>"}</Code></Cell>
-          <Cell>Collapsible section</Cell>
-        </TableRow>
-        <TableRow>
-          <Cell><Code>{"<Table> + <TableHead> + <TableRow>"}</Code></Cell>
-          <Cell>GFM table</Cell>
-        </TableRow>
-        <TableRow>
-          <Cell><Code>{"<Section title=... level=...>"}</Code></Cell>
-          <Cell>Heading + content block</Cell>
-        </TableRow>
+        {componentRows.map(row => (
+          <TableRow>
+            <Cell><Code>{row.usage}</Code></Cell>
+            <Cell>{row.output}</Cell>
+          </TableRow>
+        ))}
       </Table>
     </Section>
 

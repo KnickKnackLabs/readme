@@ -8,6 +8,7 @@ import {
   Raw, HtmlLink, Sub, Align, HtmlTable, HtmlTr, HtmlTd,
   Badge, Badges,
   Section,
+  box, labeledBox, sideBySide,
 } from "./components";
 
 // --- Inline elements ---
@@ -333,5 +334,121 @@ describe("composition", () => {
       "| a | first |\n" +
       "| b | second |\n\n"
     );
+  });
+});
+
+// --- Box drawing utilities ---
+
+describe("box", () => {
+  test("draws ASCII box by default", () => {
+    const result = box(["hello"]);
+    expect(result).toEqual([
+      "+-------+",
+      "| hello |",
+      "+-------+",
+    ]);
+  });
+
+  test("draws Unicode box with style option", () => {
+    const result = box(["hello"], { style: "unicode" });
+    expect(result).toEqual([
+      "┌───────┐",
+      "│ hello │",
+      "└───────┘",
+    ]);
+  });
+
+  test("pads lines to equal width", () => {
+    const result = box(["hi", "longer"]);
+    expect(result).toEqual([
+      "+--------+",
+      "| hi     |",
+      "| longer |",
+      "+--------+",
+    ]);
+  });
+
+  test("respects custom padding", () => {
+    const result = box(["hi"], { padding: 3 });
+    expect(result).toEqual([
+      "+--------+",
+      "|   hi   |",
+      "+--------+",
+    ]);
+  });
+
+  test("handles empty lines", () => {
+    const result = box(["a", "", "b"]);
+    expect(result).toHaveLength(5); // top + 3 content + bottom
+    expect(result[2]).toBe("|   |"); // empty line gets padded to max width
+  });
+
+  test("returns empty array for empty input", () => {
+    expect(box([])).toEqual([]);
+  });
+});
+
+describe("labeledBox", () => {
+  test("creates box with title, body, and status", () => {
+    const lines = labeledBox("Title", ["line 1", "line 2"], "ok");
+    expect(lines[0]).toBe("+--------+"); // top border
+    expect(lines[1]).toBe("| Title  |"); // title
+    expect(lines[2]).toBe("|        |"); // gap
+    expect(lines[3]).toBe("| line 1 |"); // body
+    expect(lines[4]).toBe("| line 2 |"); // body
+    expect(lines[5]).toBe("|        |"); // gap
+    expect(lines[6]).toBe("| ok     |"); // status
+    expect(lines[7]).toBe("+--------+"); // bottom border
+  });
+
+  test("supports unicode style", () => {
+    const lines = labeledBox("T", ["b"], "s", { style: "unicode" });
+    expect(lines[0]).toStartWith("┌");
+    expect(lines[0]).toEndWith("┐");
+    expect(lines[lines.length - 1]).toStartWith("└");
+  });
+
+  test("sizes to longest content", () => {
+    const lines = labeledBox("A", ["very long body line"], "B");
+    // All lines should have the same length
+    const lengths = new Set(lines.map(l => l.length));
+    expect(lengths.size).toBe(1);
+  });
+});
+
+describe("sideBySide", () => {
+  test("places columns next to each other", () => {
+    const left = ["aaa", "bbb"];
+    const right = ["111", "222"];
+    const result = sideBySide([left, right]);
+    expect(result).toEqual(["aaa  111", "bbb  222"]);
+  });
+
+  test("pads shorter columns with spaces", () => {
+    const left = ["a", "b", "c"];
+    const right = ["1"];
+    const result = sideBySide([left, right]);
+    expect(result).toHaveLength(3);
+    expect(result[0]).toBe("a  1");
+    expect(result[1]).toBe("b   "); // right column padded
+    expect(result[2]).toBe("c   ");
+  });
+
+  test("respects custom gap", () => {
+    const result = sideBySide([["aa"], ["bb"]], 4);
+    expect(result).toEqual(["aa    bb"]);
+  });
+
+  test("works with labeledBox output", () => {
+    const a = labeledBox("A", ["x"], "ok");
+    const b = labeledBox("B", ["y"], "ok");
+    const result = sideBySide([a, b]);
+    // Every line should have the same length
+    const lengths = new Set(result.map(l => l.length));
+    expect(lengths.size).toBe(1);
+  });
+
+  test("returns empty array for empty input", () => {
+    expect(sideBySide([])).toEqual([]);
   });
 });
