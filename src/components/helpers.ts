@@ -7,6 +7,10 @@ export function flatten(c: any): string {
   return String(c);
 }
 
+export function escapeHtml(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
 export function shieldsEncode(s: string): string {
   return encodeURIComponent(s).replaceAll("-", "--").replaceAll("_", "__");
 }
