@@ -13,6 +13,7 @@ import {
 
 import type { ComponentMeta } from "./src/components";
 import * as allComponents from "./src/components";
+import { escapeHtml } from "./src/components/helpers";
 
 // Build component reference from exports — each export with .meta is documented,
 // those without are shown with a warning
@@ -106,7 +107,7 @@ readme build --check      # Exit 1 if README.md is stale (for CI)`}</CodeBlock>
         {componentRows.map(row => (
           <TableRow>
             <Cell><Code>{row.usage}</Code></Cell>
-            <Cell>{row.output}</Cell>
+            <Cell>{escapeHtml(row.output)}</Cell>
           </TableRow>
         ))}
       </Table>

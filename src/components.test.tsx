@@ -10,6 +10,7 @@ import {
   Section,
   box, labeledBox, sideBySide,
 } from "./components";
+import { escapeHtml } from "./components/helpers";
 
 // --- Inline elements ---
 
@@ -334,6 +335,67 @@ describe("composition", () => {
       "| a | first |\n" +
       "| b | second |\n\n"
     );
+  });
+});
+
+// --- Helpers ---
+
+describe("escapeHtml", () => {
+  test("escapes angle brackets", () => {
+    expect(escapeHtml("<table>")).toBe("&lt;table&gt;");
+  });
+
+  test("escapes ampersands", () => {
+    expect(escapeHtml("a & b")).toBe("a &amp; b");
+  });
+
+  test("escapes ampersands before angle brackets", () => {
+    expect(escapeHtml("&lt;")).toBe("&amp;lt;");
+  });
+
+  test("passes through plain text unchanged", () => {
+    expect(escapeHtml("hello world")).toBe("hello world");
+  });
+
+  test("handles empty string", () => {
+    expect(escapeHtml("")).toBe("");
+  });
+
+  test("escapes complex HTML", () => {
+    expect(escapeHtml('<div align="center">')).toBe('&lt;div align="center"&gt;');
+  });
+});
+
+// --- Table cells with HTML content (regression) ---
+
+describe("table with HTML in cells", () => {
+  test("escaped HTML in cells does not break table structure", () => {
+    const result = (
+      <Table>
+        <TableHead>
+          <Cell>Component</Cell>
+          <Cell>Output</Cell>
+        </TableHead>
+        <TableRow>
+          <Cell><Code>{"<Center>...</Center>"}</Code></Cell>
+          <Cell>{escapeHtml('<div align="center">')}</Cell>
+        </TableRow>
+        <TableRow>
+          <Cell><Code>{"<HtmlTable>...</HtmlTable>"}</Code></Cell>
+          <Cell>{escapeHtml("<table> for layout")}</Cell>
+        </TableRow>
+      </Table>
+    );
+    // Escaped HTML should not contain raw tags
+    expect(result).not.toContain("| <div");
+    expect(result).not.toContain("| <table>");
+    expect(result).toContain("&lt;div");
+    expect(result).toContain("&lt;table&gt;");
+    // Table structure should be intact — exactly 4 lines (header, separator, 2 rows)
+    // plus trailing newline
+    const lines = result.trimEnd().split("\n");
+    expect(lines).toHaveLength(4);
+    expect(lines.every(l => l.startsWith("|") && l.endsWith("|"))).toBe(true);
   });
 });
 
