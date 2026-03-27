@@ -7,6 +7,7 @@ import {
   Center, Details,
   Raw, HtmlLink, Sub, Align, HtmlTable, HtmlTr, HtmlTd,
   Badge, Badges,
+  Chat, Message,
   Section,
   Alert,
   box, labeledBox, sideBySide,
@@ -560,5 +561,62 @@ describe("sideBySide", () => {
 
   test("returns empty array for empty input", () => {
     expect(sideBySide([])).toEqual([]);
+  });
+});
+
+// --- Chat components ---
+
+describe("Message", () => {
+  test("renders sender name in bold blockquote", () => {
+    const result = <Message from="alice">hello</Message>;
+    expect(result).toContain("**alice**");
+    expect(result).toContain("> hello");
+  });
+
+  test("renders badge prefix before name", () => {
+    const result = <Message from="junior" badge="R">test</Message>;
+    expect(result).toContain("**R junior**");
+  });
+
+  test("renders timestamp as subscript", () => {
+    const result = <Message from="alice" timestamp="10:58 PM">hi</Message>;
+    expect(result).toContain("<sub>10:58 PM</sub>");
+  });
+
+  test("omits badge when not provided", () => {
+    const result = <Message from="alice">hi</Message>;
+    expect(result).not.toContain("undefined");
+    expect(result).toMatch(/\*\*alice\*\*/);
+  });
+
+  test("omits timestamp when not provided", () => {
+    const result = <Message from="alice">hi</Message>;
+    expect(result).not.toContain("<sub>");
+  });
+
+  test("handles multiline body", () => {
+    const result = <Message from="alice">{"line1\nline2"}</Message>;
+    expect(result).toContain("> line1");
+    expect(result).toContain("> line2");
+  });
+});
+
+describe("Chat", () => {
+  test("passes children through", () => {
+    const result = <Chat>{"hello"}</Chat>;
+    expect(result).toBe("hello");
+  });
+
+  test("composes multiple messages", () => {
+    const result = (
+      <Chat>
+        <Message from="alice">hi</Message>
+        <Message from="bob">hey</Message>
+      </Chat>
+    );
+    expect(result).toContain("**alice**");
+    expect(result).toContain("**bob**");
+    expect(result).toContain("> hi");
+    expect(result).toContain("> hey");
   });
 });

@@ -19,5 +19,6 @@ export { Center, Details, Section, Align } from "./layout";
 export { Raw, HtmlLink, Sub, HtmlTable, HtmlTr, HtmlTd } from "./html";
 export { Badge, Badges } from "./badges";
 export { Alert } from "./alert";
+export { Chat, Message } from "./chat";
 export type { BoxStyle } from "./box";
 export { box, labeledBox, sideBySide } from "./box";
