@@ -53,7 +53,7 @@ readme build              # README.tsx → README.md
 readme build --check      # Exit 1 if README.md is stale (for CI)
 ```
 
-## Components (33)
+## Components (35)
 
 Auto-generated from `src/components/` exports. Each component carries a `.meta` property describing its usage.
 
@@ -68,6 +68,7 @@ Auto-generated from `src/components/` exports. Each component carries a `.meta` 
 | `<Bold>text</Bold>` | **text** |
 | `<Cell>text</Cell>` | Table cell content |
 | `<Center>...</Center>` | &lt;div align="center"&gt; |
+| `<Chat><Message ...>...</Message></Chat>` | Conversation transcript as blockquotes |
 | `<Code>text</Code>` | `` `text` `` |
 | `<CodeBlock lang="bash">...</CodeBlock>` | Fenced code block |
 | `<Details summary=...>...</Details>` | Collapsible section |
@@ -83,6 +84,8 @@ Auto-generated from `src/components/` exports. Each component carries a `.meta` 
 | `<LineBreak />` | &lt;br /&gt; |
 | `<Link href="url">text</Link>` | [text](url) |
 | `<List><Item>...</Item></List>` | Bulleted or numbered list |
+| `<Message from="alice" badge="🤖">Hello!</Message>` | &gt; **🤖 alice**\
+&gt; Hello! |
 | `<Paragraph>Text</Paragraph>` | Text with trailing blank line |
 | `<Raw>html</Raw>` | HTML passthrough |
 | `<Section title=... level=...>` | Heading + content block |
