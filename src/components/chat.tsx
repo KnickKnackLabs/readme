@@ -23,7 +23,7 @@ Message.meta = {
 } satisfies ComponentMeta;
 
 /**
- * A conversation thread — a sequence of Messages rendered as connected blockquotes.
+ * A conversation thread — semantic wrapper for a sequence of Messages.
  *
  * <Chat>
  *   <Message from="alice">Hi!</Message>

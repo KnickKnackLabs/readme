@@ -9,6 +9,7 @@ import {
   Badge, Badges,
   Section,
   Alert,
+  Chat, Message,
   box, labeledBox, sideBySide,
 } from "./components";
 import { escapeHtml } from "./components/helpers";
@@ -400,6 +401,7 @@ describe("table with HTML in cells", () => {
   });
 });
 
+<<<<<<< HEAD
 // --- Alerts ---
 
 describe("Alert", () => {
