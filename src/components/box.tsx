@@ -24,26 +24,31 @@ export function box(lines: string[], { padding = 1, style = "ascii" as BoxStyle 
 box.meta = { usage: "box(lines, { style, padding })", output: "ASCII or Unicode box around text (string[])" } satisfies ComponentMeta;
 
 /**
- * Draw a labeled box with a title, body lines, and a status line.
+ * Draw a labeled box with a title, body lines, and an optional status line.
  * Returns an array of lines (for use with sideBySide).
  */
-export function labeledBox(title: string, body: string[], status: string, { style = "ascii" as BoxStyle } = {}): string[] {
+export function labeledBox(title: string, body: string[], status?: string, { style = "ascii" as BoxStyle } = {}): string[] {
   if (!body.length) body = [""];
   const c = BOX_CHARS[style];
-  const maxLen = Math.max(title.length, ...body.map((l) => l.length), status.length);
+  const parts = [title, ...body];
+  if (status) parts.push(status);
+  const maxLen = Math.max(...parts.map((l) => l.length));
   const w = maxLen + 2;
   const pad = (s: string) => " " + s + " ".repeat(w - s.length - 1);
-  return [
+  const lines = [
     c.tl + c.h.repeat(w) + c.tr,
     c.v + pad(title) + c.v,
     c.v + " ".repeat(w) + c.v,
     ...body.map((l) => c.v + pad(l) + c.v),
-    c.v + " ".repeat(w) + c.v,
-    c.v + pad(status) + c.v,
-    c.bl + c.h.repeat(w) + c.br,
   ];
+  if (status) {
+    lines.push(c.v + " ".repeat(w) + c.v);
+    lines.push(c.v + pad(status) + c.v);
+  }
+  lines.push(c.bl + c.h.repeat(w) + c.br);
+  return lines;
 }
-labeledBox.meta = { usage: "labeledBox(title, body, status)", output: "Box with title, body, and status" } satisfies ComponentMeta;
+labeledBox.meta = { usage: "labeledBox(title, body, status?)", output: "Box with title, body, and optional status" } satisfies ComponentMeta;
 
 /**
  * Combine arrays of lines side-by-side with a gap between columns.

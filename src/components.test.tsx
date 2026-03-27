@@ -8,6 +8,7 @@ import {
   Raw, HtmlLink, Sub, Align, HtmlTable, HtmlTr, HtmlTd,
   Badge, Badges,
   Section,
+  Alert,
   box, labeledBox, sideBySide,
 } from "./components";
 import { escapeHtml } from "./components/helpers";
@@ -399,6 +400,35 @@ describe("table with HTML in cells", () => {
   });
 });
 
+// --- Alerts ---
+
+describe("Alert", () => {
+  test("defaults to NOTE type", () => {
+    expect(<Alert>Some info here.</Alert>).toBe("> [!NOTE]\n> Some info here.\n\n");
+  });
+
+  test("renders WARNING type", () => {
+    expect(<Alert type="WARNING">Be careful.</Alert>).toBe("> [!WARNING]\n> Be careful.\n\n");
+  });
+
+  test("renders all alert types", () => {
+    for (const type of ["NOTE", "TIP", "IMPORTANT", "WARNING", "CAUTION"] as const) {
+      const result = <Alert type={type}>text</Alert>;
+      expect(result).toStartWith(`> [!${type}]`);
+    }
+  });
+
+  test("handles multiline content", () => {
+    expect(<Alert>{"line 1\nline 2"}</Alert>).toBe("> [!NOTE]\n> line 1\n> line 2\n\n");
+  });
+
+  test("handles inline children", () => {
+    expect(<Alert>Use <Code>npm install</Code> first.</Alert>).toBe(
+      "> [!NOTE]\n> Use `npm install` first.\n\n"
+    );
+  });
+});
+
 // --- Box drawing utilities ---
 
 describe("box", () => {
@@ -475,6 +505,24 @@ describe("labeledBox", () => {
     // All lines should have the same length
     const lengths = new Set(lines.map(l => l.length));
     expect(lengths.size).toBe(1);
+  });
+
+  test("omits status section when status is undefined", () => {
+    const lines = labeledBox("Title", ["body"]);
+    // Should be: top, title, gap, body, bottom = 5 lines
+    expect(lines).toHaveLength(5);
+    expect(lines[0]).toBe("+-------+");
+    expect(lines[1]).toBe("| Title |");
+    expect(lines[2]).toBe("|       |");
+    expect(lines[3]).toBe("| body  |");
+    expect(lines[4]).toBe("+-------+");
+  });
+
+  test("omits status section when status is empty string", () => {
+    const withoutStatus = labeledBox("T", ["b"]);
+    const withStatus = labeledBox("T", ["b"], "s");
+    // Without status should be shorter (no gap + status lines)
+    expect(withoutStatus.length).toBe(withStatus.length - 2);
   });
 });
 

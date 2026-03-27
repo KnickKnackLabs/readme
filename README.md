@@ -53,12 +53,14 @@ readme build              # README.tsx → README.md
 readme build --check      # Exit 1 if README.md is stale (for CI)
 ```
 
-## Components (32)
+## Components (33)
 
 Auto-generated from `src/components/` exports. Each component carries a `.meta` property describing its usage.
 
 | Component | Output |
 | --- | --- |
+| `<Alert type="WARNING">text</Alert>` | &gt; [!WARNING]
+&gt; text |
 | `<Align align="center">...</Align>` | &lt;p align="..."&gt; |
 | `<Badge label=... value=... />` | shields.io badge |
 | `<Badges>...</Badges>` | Badge row with spacing |
@@ -89,7 +91,7 @@ Auto-generated from `src/components/` exports. Each component carries a `.meta` 
 | `<TableHead><Cell>...</Cell></TableHead>` | Header row + separator |
 | `<TableRow><Cell>...</Cell></TableRow>` | Table data row |
 | `box(lines, { style, padding })` | ASCII or Unicode box around text (string[]) |
-| `labeledBox(title, body, status)` | Box with title, body, and status |
+| `labeledBox(title, body, status?)` | Box with title, body, and optional status |
 | `sideBySide(columns, gap)` | Place line arrays side by side |
 
 ## Why JSX?
