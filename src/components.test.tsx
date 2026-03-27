@@ -401,7 +401,6 @@ describe("table with HTML in cells", () => {
   });
 });
 
-<<<<<<< HEAD
 // --- Alerts ---
 
 describe("Alert", () => {
