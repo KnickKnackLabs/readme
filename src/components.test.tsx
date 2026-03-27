@@ -10,7 +10,6 @@ import {
   Chat, Message,
   Section,
   Alert,
-  Chat, Message,
   box, labeledBox, sideBySide,
 } from "./components";
 import { escapeHtml } from "./components/helpers";
