@@ -9,11 +9,11 @@ import {
   Badge, Badges, Center, Details, Section,
   Table, TableHead, TableRow, Cell,
   List, Item,
-} from "./src/components";
+} from "readme";
 
-import type { ComponentMeta } from "./src/components";
-import * as allComponents from "./src/components";
-import { escapeHtml } from "./src/components/helpers";
+import type { ComponentMeta } from "readme";
+import * as allComponents from "readme";
+import { escapeHtml } from "readme/src/components/helpers";
 
 // Build component reference from exports — each export with .meta is documented,
 // those without are shown with a warning

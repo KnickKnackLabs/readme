@@ -17,6 +17,7 @@ cat > "$TSCONFIG" <<CONF
     "paths": {
       "jsx-md/jsx-runtime": ["$REPO_DIR/src/jsx-runtime.ts"],
       "jsx-md/jsx-dev-runtime": ["$REPO_DIR/src/jsx-dev-runtime.ts"],
+      "readme": ["$REPO_DIR/src/index.ts"],
       "readme/*": ["$REPO_DIR/*"]
     }
   }
