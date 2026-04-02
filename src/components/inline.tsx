@@ -6,9 +6,9 @@ export function Bold({ children: c }: { children: string }) {
 Bold.meta = { usage: "<Bold>text</Bold>", output: "**text**" } satisfies ComponentMeta;
 
 export function Italic({ children: c }: { children: string }) {
-  return `*${c}*`;
+  return `_${c}_`;
 }
-Italic.meta = { usage: "<Italic>text</Italic>", output: "*text*" } satisfies ComponentMeta;
+Italic.meta = { usage: "<Italic>text</Italic>", output: "_text_" } satisfies ComponentMeta;
 
 export function Code({ children: c }: { children: string }) {
   return `\`${c}\``;

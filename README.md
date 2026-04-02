@@ -79,7 +79,7 @@ Auto-generated from `src/components/` exports. Each component carries a `.meta` 
 | `<HtmlTd width=... valign=...>` | &lt;td&gt; cell with optional sizing |
 | `<HtmlTr>...</HtmlTr>` | &lt;tr&gt; row |
 | `<Image src="..." alt="..." />` | ![alt](src) or HTML with width |
-| `<Italic>text</Italic>` | *text* |
+| `<Italic>text</Italic>` | _text_ |
 | `<Item>text</Item>` | List item content |
 | `<LineBreak />` | &lt;br /&gt; |
 | `<Link href="url">text</Link>` | [text](url) |
@@ -90,7 +90,7 @@ Auto-generated from `src/components/` exports. Each component carries a `.meta` 
 | `<Raw>html</Raw>` | HTML passthrough |
 | `<Section title=... level=...>` | Heading + content block |
 | `<Sub>text</Sub>` | &lt;sub&gt; tag |
-| `<Table>...</Table>` | GFM table wrapper |
+| `<Table>...</Table>` | GFM table (Prettier-compatible padding) |
 | `<TableHead><Cell>...</Cell></TableHead>` | Header row + separator |
 | `<TableRow><Cell>...</Cell></TableRow>` | Table data row |
 | `box(lines, { style, padding })` | ASCII or Unicode box around text (string[]) |

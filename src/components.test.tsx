@@ -24,7 +24,7 @@ describe("Bold", () => {
 
 describe("Italic", () => {
   test("wraps text in single asterisks", () => {
-    expect(<Italic>hello</Italic>).toBe("*hello*");
+    expect(<Italic>hello</Italic>).toBe("_hello_");
   });
 });
 
@@ -149,9 +149,9 @@ describe("Table", () => {
     );
     expect(result).toBe(
       "| Name | Value |\n" +
-      "| --- | --- |\n" +
-      "| foo | bar |\n" +
-      "| baz | qux |\n\n"
+      "| ---- | ----- |\n" +
+      "| foo  | bar   |\n" +
+      "| baz  | qux   |\n\n"
     );
   });
 });
@@ -332,10 +332,10 @@ describe("composition", () => {
     );
     expect(result).not.toContain(",|");
     expect(result).toBe(
-      "| Name | Desc |\n" +
-      "| --- | --- |\n" +
-      "| a | first |\n" +
-      "| b | second |\n\n"
+      "| Name | Desc   |\n" +
+      "| ---- | ------ |\n" +
+      "| a    | first  |\n" +
+      "| b    | second |\n\n"
     );
   });
 });
