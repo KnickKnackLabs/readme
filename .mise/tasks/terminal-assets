@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+#MISE description="Generate terminal screenshot SVG assets from a definitions file"
+#USAGE flag "--out-dir <dir>" help="Output directory for SVG assets (default: docs/assets/terminal)" default="docs/assets/terminal"
+#USAGE arg "<definitions>" help="Path to a JS/TS file that exports an array of { content, opts? } entries" required=true
+set -e
+
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+OUT_DIR="${usage_out_dir:-docs/assets/terminal}"
+
+TSCONFIG=$(mktemp)
+cat > "$TSCONFIG" <<CONF
+{
+  "compilerOptions": {
+    "paths": {
+      "readme": ["$REPO_DIR/src/index.ts"],
+      "readme/*": ["$REPO_DIR/*"]
+    }
+  }
+}
+CONF
+trap 'rm -f "$TSCONFIG"' EXIT
+
+bun run --tsconfig-override "$TSCONFIG" - <<SCRIPT
+import entries from "$1";
+import { writeTerminalAsset, terminalAssetPath } from "$REPO_DIR/src/lib/terminal.ts";
+import { mkdir } from "fs/promises";
+await mkdir("$OUT_DIR", { recursive: true });
+for (const { content, opts } of entries) {
+  const path = await writeTerminalAsset(content, { ...opts, outDir: "$OUT_DIR" });
+  console.log("Generated", path);
+}
+SCRIPT

@@ -11,6 +11,7 @@ import {
   Section,
   Alert,
   box, labeledBox, sideBySide,
+  TerminalImage,
 } from "./components";
 import { escapeHtml } from "./components/helpers";
 
@@ -618,5 +619,21 @@ describe("Chat", () => {
     expect(result).toContain("**bob**");
     expect(result).toContain("> hi");
     expect(result).toContain("> hey");
+  });
+});
+
+// --- TerminalImage ---
+
+describe("TerminalImage", () => {
+  test("renders markdown image", () => {
+    expect(
+      <TerminalImage src="docs/assets/terminal/abc123.svg" alt="demo" />
+    ).toBe("![demo](docs/assets/terminal/abc123.svg)");
+  });
+
+  test("renders HTML img when width provided", () => {
+    expect(
+      <TerminalImage src="docs/assets/terminal/abc123.svg" alt="demo" width={600} />
+    ).toBe('<img src="docs/assets/terminal/abc123.svg" alt="demo" width="600" />');
   });
 });
