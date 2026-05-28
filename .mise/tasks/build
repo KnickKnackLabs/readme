@@ -4,7 +4,18 @@
 set -e
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-TARGET_DIR="${CALLER_PWD:-$REPO_DIR}"
+
+if [[ -n "$README_CALLER_PWD" ]]; then
+  TARGET_DIR="$README_CALLER_PWD"
+elif [[ "$PWD" == "$REPO_DIR" ]]; then
+  TARGET_DIR="$REPO_DIR"
+else
+  echo "Error: README_CALLER_PWD is not set." >&2
+  echo "When calling the readme build task from outside the readme package, set it to" >&2
+  echo "the directory containing your README.tsx, e.g.:" >&2
+  echo "  README_CALLER_PWD=\"\$PWD\" mise run readme:build --check" >&2
+  exit 1
+fi
 
 # Bun's --tsconfig-override is broken for jsxImportSource (oven-sh/bun#22023),
 # but it does work for paths. So we split the responsibility:
