@@ -14,3 +14,7 @@ export function escapeHtml(s: string): string {
 export function shieldsEncode(s: string): string {
   return encodeURIComponent(s).replaceAll("-", "--").replaceAll("_", "__");
 }
+
+export function slugify(text: string): string {
+  return text.toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]/g, "");
+}

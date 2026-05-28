@@ -1,6 +1,6 @@
 import { expect, test, describe } from "bun:test";
 import {
-  Bold, Italic, Code, Link, Image,
+  Bold, Italic, Code, Link, Image, Anchor,
   Heading, Paragraph, CodeBlock, Blockquote, HR, LineBreak,
   List, Item,
   Table, TableHead, TableRow, Cell,
@@ -11,6 +11,7 @@ import {
   Section,
   Alert,
   box, labeledBox, sideBySide,
+  TOC, slugify,
 } from "./components";
 import { escapeHtml } from "./components/helpers";
 
@@ -618,5 +619,90 @@ describe("Chat", () => {
     expect(result).toContain("**bob**");
     expect(result).toContain("> hi");
     expect(result).toContain("> hey");
+  });
+});
+
+// --- slugify helper ---
+
+describe("slugify", () => {
+  test("lowercases text", () => {
+    expect(slugify("Hello World")).toBe("hello-world");
+  });
+
+  test("replaces spaces with hyphens", () => {
+    expect(slugify("getting started")).toBe("getting-started");
+  });
+
+  test("strips non-word characters", () => {
+    expect(slugify("What's new?")).toBe("whats-new");
+  });
+
+  test("preserves existing hyphens", () => {
+    expect(slugify("step-by-step")).toBe("step-by-step");
+  });
+
+  test("handles multiple spaces", () => {
+    expect(slugify("a  b")).toBe("a-b");
+  });
+});
+
+// --- Anchor component ---
+
+describe("Anchor", () => {
+  test("renders in-page link", () => {
+    expect(<Anchor id="installation">Installation</Anchor>).toBe("[Installation](#installation)");
+  });
+
+  test("uses provided id verbatim", () => {
+    expect(<Anchor id="my-section">My Section</Anchor>).toBe("[My Section](#my-section)");
+  });
+});
+
+// --- TOC component ---
+
+describe("TOC", () => {
+  test("renders a single entry", () => {
+    expect(<TOC entries={[{ text: "Installation" }]} />).toBe("- [Installation](#installation)\n\n");
+  });
+
+  test("auto-slugs text when id is omitted", () => {
+    expect(<TOC entries={[{ text: "Getting Started" }]} />).toBe("- [Getting Started](#getting-started)\n\n");
+  });
+
+  test("uses explicit id when provided", () => {
+    expect(<TOC entries={[{ text: "Intro", id: "custom-id" }]} />).toBe("- [Intro](#custom-id)\n\n");
+  });
+
+  test("indents by level relative to minimum", () => {
+    const result = <TOC entries={[
+      { text: "Install", level: 1 },
+      { text: "Usage", level: 2 },
+      { text: "Advanced", level: 3 },
+    ]} />;
+    expect(result).toBe(
+      "- [Install](#install)\n" +
+      "  - [Usage](#usage)\n" +
+      "    - [Advanced](#advanced)\n\n"
+    );
+  });
+
+  test("indentation is relative — level 2 base has no leading indent", () => {
+    const result = <TOC entries={[
+      { text: "Usage", level: 2 },
+      { text: "Advanced", level: 3 },
+    ]} />;
+    expect(result).toBe(
+      "- [Usage](#usage)\n" +
+      "  - [Advanced](#advanced)\n\n"
+    );
+  });
+
+  test("returns empty string for empty entries", () => {
+    expect(<TOC entries={[]} />).toBe("");
+  });
+
+  test("defaults level to 1 when omitted", () => {
+    const result = <TOC entries={[{ text: "A" }, { text: "B" }]} />;
+    expect(result).toBe("- [A](#a)\n- [B](#b)\n\n");
   });
 });

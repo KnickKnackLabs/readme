@@ -11,7 +11,7 @@
 // README.tsx to auto-generate the component reference table.
 
 export type { ComponentMeta } from "./types";
-export { Bold, Italic, Code, Link, Image } from "./inline";
+export { Bold, Italic, Code, Link, Image, Anchor } from "./inline";
 export { Heading, Paragraph, CodeBlock, Blockquote, HR, LineBreak } from "./block";
 export { List, Item } from "./list";
 export { Table, TableHead, TableRow, Cell } from "./table";
@@ -22,3 +22,6 @@ export { Alert } from "./alert";
 export { Chat, Message } from "./chat";
 export type { BoxStyle } from "./box";
 export { box, labeledBox, sideBySide } from "./box";
+export type { TocEntry } from "./toc";
+export { TOC } from "./toc";
+export { slugify } from "./helpers";
