@@ -20,5 +20,6 @@ export { Raw, HtmlLink, Sub, HtmlTable, HtmlTr, HtmlTd } from "./html";
 export { Badge, Badges } from "./badges";
 export { Alert } from "./alert";
 export { Chat, Message } from "./chat";
+export { Rule, RuleSet } from "./math";
 export type { BoxStyle } from "./box";
 export { box, labeledBox, sideBySide } from "./box";
