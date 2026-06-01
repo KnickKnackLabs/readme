@@ -18,4 +18,4 @@ jobs:
         run: mise run test
 
       - name: Check README.md is up to date
-        run: mise run build -- --check
+        run: README_CALLER_PWD="$PWD" mise run build -- --check
