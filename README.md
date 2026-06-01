@@ -30,7 +30,7 @@ shiv install KnickKnackLabs/readme
 Create a `README.tsx` in your project root:
 
 ```tsx
-import { Heading, Paragraph, Bold, Section, CodeBlock } from "./src/components";
+import { Heading, Paragraph, Bold, Section, CodeBlock } from "readme";
 
 const readme = (
   <>

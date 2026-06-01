@@ -69,7 +69,7 @@ const readme = (
         Create a <Code>README.tsx</Code> in your project root:
       </Paragraph>
 
-      <CodeBlock lang="tsx">{`import { Heading, Paragraph, Bold, Section, CodeBlock } from "./src/components";
+      <CodeBlock lang="tsx">{`import { Heading, Paragraph, Bold, Section, CodeBlock } from "readme";
 
 const readme = (
   <>
