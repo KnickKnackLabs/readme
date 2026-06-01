@@ -53,7 +53,7 @@ readme build              # README.tsx → README.md
 readme build --check      # Exit 1 if README.md is stale (for CI)
 ```
 
-## Components (35)
+## Components (38)
 
 Auto-generated from `src/components/` exports. Each component carries a `.meta` property describing its usage.
 
@@ -62,6 +62,7 @@ Auto-generated from `src/components/` exports. Each component carries a `.meta` 
 | `<Alert type="WARNING">text</Alert>` | &gt; [!WARNING]
 &gt; text |
 | `<Align align="center">...</Align>` | &lt;p align="..."&gt; |
+| `<Anchor id="section">text</Anchor>` | [text](#section) |
 | `<Badge label=... value=... />` | shields.io badge |
 | `<Badges>...</Badges>` | Badge row with spacing |
 | `<Blockquote>text</Blockquote>` | &gt; text |
@@ -90,12 +91,14 @@ Auto-generated from `src/components/` exports. Each component carries a `.meta` 
 | `<Raw>html</Raw>` | HTML passthrough |
 | `<Section title=... level=...>` | Heading + content block |
 | `<Sub>text</Sub>` | &lt;sub&gt; tag |
+| `<TOC entries={[{ text: "Usage", level: 2 }]} />` | Nested markdown list of in-page links |
 | `<Table>...</Table>` | GFM table (Prettier-compatible padding) |
 | `<TableHead><Cell>...</Cell></TableHead>` | Header row + separator |
 | `<TableRow><Cell>...</Cell></TableRow>` | Table data row |
 | `box(lines, { style, padding })` | ASCII or Unicode box around text (string[]) |
 | `labeledBox(title, body, status?)` | Box with title, body, and optional status |
 | `sideBySide(columns, gap)` | Place line arrays side by side |
+| `slugify` | ⚠️ undocumented |
 
 ## Why JSX?
 
