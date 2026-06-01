@@ -90,6 +90,26 @@ console.log(readme);`}</CodeBlock>
 readme build --check      # Exit 1 if README.md is stale (for CI)`}</CodeBlock>
     </Section>
 
+    <Section title="GitHub Action">
+      <Paragraph>
+        Use the composite action to keep generated READMEs honest in CI:
+      </Paragraph>
+
+      <CodeBlock lang="yaml">{`- uses: KnickKnackLabs/readme@v0.3.0
+  with:
+    check: true`}</CodeBlock>
+
+      <Paragraph>
+        For READMEs outside the workspace root, set <Code>working-directory</Code>
+        {" to the directory containing "}<Code>README.tsx</Code>:
+      </Paragraph>
+
+      <CodeBlock lang="yaml">{`- uses: KnickKnackLabs/readme@v0.3.0
+  with:
+    check: true
+    working-directory: docs`}</CodeBlock>
+    </Section>
+
     <Section title={`Components (${componentRows.length})`}>
       <Paragraph>
         {"Auto-generated from "}

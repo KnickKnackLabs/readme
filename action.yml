@@ -1,0 +1,51 @@
+name: README check
+description: Build or verify README.md from README.tsx using the readme package.
+
+inputs:
+  check:
+    description: If true, exit 1 when README.md is out of date instead of regenerating it.
+    required: false
+    default: 'false'
+  working-directory:
+    description: Directory containing README.tsx. Defaults to the caller's workspace root.
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Install mise
+      uses: jdx/mise-action@v2
+      with:
+        working_directory: ${{ github.action_path }}
+
+    - name: Build / check README
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        INPUT_CHECK: ${{ inputs.check }}
+        INPUT_WORKING_DIRECTORY: ${{ inputs.working-directory }}
+        WORKSPACE: ${{ github.workspace }}
+      run: |
+        set -euo pipefail
+
+        target="$WORKSPACE"
+        if [[ -n "$INPUT_WORKING_DIRECTORY" ]]; then
+          if [[ "$INPUT_WORKING_DIRECTORY" = /* ]]; then
+            target="$INPUT_WORKING_DIRECTORY"
+          else
+            target="$WORKSPACE/$INPUT_WORKING_DIRECTORY"
+          fi
+        fi
+
+        if [[ ! -d "$target" ]]; then
+          echo "readme action: working-directory does not exist: $target" >&2
+          exit 1
+        fi
+        target="$(cd "$target" && pwd)"
+
+        if [[ "$INPUT_CHECK" == "true" ]]; then
+          README_CALLER_PWD="$target" mise -C "$ACTION_PATH" run build --check
+        else
+          README_CALLER_PWD="$target" mise -C "$ACTION_PATH" run build
+        fi

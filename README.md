@@ -53,6 +53,25 @@ readme build              # README.tsx → README.md
 readme build --check      # Exit 1 if README.md is stale (for CI)
 ```
 
+## GitHub Action
+
+Use the composite action to keep generated READMEs honest in CI:
+
+```yaml
+- uses: KnickKnackLabs/readme@v0.3.0
+  with:
+    check: true
+```
+
+For READMEs outside the workspace root, set `working-directory` to the directory containing `README.tsx`:
+
+```yaml
+- uses: KnickKnackLabs/readme@v0.3.0
+  with:
+    check: true
+    working-directory: docs
+```
+
 ## Components (35)
 
 Auto-generated from `src/components/` exports. Each component carries a `.meta` property describing its usage.
