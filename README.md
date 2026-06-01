@@ -53,7 +53,7 @@ readme build              # README.tsx → README.md
 readme build --check      # Exit 1 if README.md is stale (for CI)
 ```
 
-## Components (35)
+## Components (39)
 
 Auto-generated from `src/components/` exports. Each component carries a `.meta` property describing its usage.
 
@@ -93,9 +93,13 @@ Auto-generated from `src/components/` exports. Each component carries a `.meta` 
 | `<Table>...</Table>` | GFM table (Prettier-compatible padding) |
 | `<TableHead><Cell>...</Cell></TableHead>` | Header row + separator |
 | `<TableRow><Cell>...</Cell></TableRow>` | Table data row |
+| `<TerminalImage src="docs/assets/terminal/abc123.svg" alt="demo" />` | ![demo](docs/assets/terminal/abc123.svg) |
 | `box(lines, { style, padding })` | ASCII or Unicode box around text (string[]) |
+| `generateTerminalSvg` | ⚠️ undocumented |
 | `labeledBox(title, body, status?)` | Box with title, body, and optional status |
 | `sideBySide(columns, gap)` | Place line arrays side by side |
+| `terminalAssetPath` | ⚠️ undocumented |
+| `writeTerminalAsset` | ⚠️ undocumented |
 
 ## Why JSX?
 
