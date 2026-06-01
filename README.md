@@ -72,7 +72,7 @@ For READMEs outside the workspace root, set `working-directory` to the directory
     working-directory: docs
 ```
 
-## Components (35)
+## Components (37)
 
 Auto-generated from `src/components/` exports. Each component carries a `.meta` property describing its usage.
 
@@ -107,6 +107,8 @@ Auto-generated from `src/components/` exports. Each component carries a `.meta` 
 &gt; Hello! |
 | `<Paragraph>Text</Paragraph>` | Text with trailing blank line |
 | `<Raw>html</Raw>` | HTML passthrough |
+| `<Rule premises={["A"]} conclusion="B" name="MyRule" />` | ```math block with \frac{A}{B} \text{ (MyRule)} |
+| `<RuleSet title="Rules"><Rule ... /></RuleSet>` | Optional heading followed by grouped Rule blocks |
 | `<Section title=... level=...>` | Heading + content block |
 | `<Sub>text</Sub>` | &lt;sub&gt; tag |
 | `<Table>...</Table>` | GFM table (Prettier-compatible padding) |

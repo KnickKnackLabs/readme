@@ -11,8 +11,9 @@ import {
   Section,
   Alert,
   box, labeledBox, sideBySide,
+  Rule, RuleSet,
 } from "./components";
-import { escapeHtml } from "./components/helpers";
+import { escapeHtml, unicodeToLatex } from "./components/helpers";
 
 // --- Inline elements ---
 
@@ -618,5 +619,123 @@ describe("Chat", () => {
     expect(result).toContain("**bob**");
     expect(result).toContain("> hi");
     expect(result).toContain("> hey");
+  });
+});
+
+// --- unicodeToLatex helper ---
+
+describe("unicodeToLatex", () => {
+  test("converts angle brackets", () => {
+    expect(unicodeToLatex("⟨A⟩")).toBe("\\langle A\\rangle ");
+  });
+
+  test("converts Downarrow", () => {
+    expect(unicodeToLatex("⇓")).toBe("\\Downarrow ");
+  });
+
+  test("converts sigma", () => {
+    expect(unicodeToLatex("σ")).toBe("\\sigma");
+  });
+
+  test("converts && to mathbin", () => {
+    expect(unicodeToLatex("A && B")).toBe("A \\mathbin{\\&\\&} B");
+  });
+
+  test("leaves plain text unchanged", () => {
+    expect(unicodeToLatex("hello")).toBe("hello");
+  });
+
+  test("converts a realistic premise string", () => {
+    const result = unicodeToLatex("⟨A, σ⟩ ⇓ (0, σ')");
+    expect(result).toContain("\\langle");
+    expect(result).toContain("\\rangle");
+    expect(result).toContain("\\Downarrow");
+    expect(result).toContain("\\sigma");
+  });
+});
+
+// --- Rule component ---
+
+describe("Rule", () => {
+  test("renders a math fenced block", () => {
+    const result = <Rule premises={["A"]} conclusion="B" />;
+    expect(result).toStartWith("```math\n");
+    expect(result).toContain("\\frac{A}{B}");
+    expect(result).toEndWith("```\n\n");
+  });
+
+  test("appends name label when provided", () => {
+    const result = <Rule premises={["A"]} conclusion="B" name="MyRule" />;
+    expect(result).toContain("\\text{ (MyRule)}");
+  });
+
+  test("omits label when name is not provided", () => {
+    const result = <Rule premises={["A"]} conclusion="B" />;
+    expect(result).not.toContain("\\text");
+  });
+
+  test("joins multiple premises with \\quad", () => {
+    const result = <Rule premises={["P1", "P2", "P3"]} conclusion="C" />;
+    expect(result).toContain("P1 \\quad P2 \\quad P3");
+  });
+
+  test("converts Unicode symbols in premises and conclusion", () => {
+    const result = <Rule
+      premises={["⟨A, σ⟩ ⇓ (0, σ')"]}
+      conclusion="⟨A && B, σ⟩ ⇓ (0, σ')"
+      name="And-Success"
+    />;
+    expect(result).toContain("\\langle");
+    expect(result).toContain("\\Downarrow");
+    expect(result).toContain("\\sigma");
+    expect(result).toContain("\\mathbin{\\&\\&}");
+    expect(result).toContain("\\text{ (And-Success)}");
+  });
+
+  test("renders exact output from issue example", () => {
+    const result = <Rule
+      premises={["⟨A, σ⟩ ⇓ (0, σ')", "⟨B, σ'⟩ ⇓ (n, σ'')"]}
+      conclusion="⟨A && B, σ⟩ ⇓ (n, σ'')"
+      name="And-Success"
+    />;
+    expect(result).toStartWith("```math\n\\frac{");
+    expect(result).toContain("\\quad");
+    expect(result).toContain("\\text{ (And-Success)}");
+    expect(result).toEndWith("```\n\n");
+  });
+});
+
+// --- RuleSet component ---
+
+describe("RuleSet", () => {
+  test("renders children without a title", () => {
+    const result = (
+      <RuleSet>
+        <Rule premises={["A"]} conclusion="B" />
+      </RuleSet>
+    );
+    expect(result).not.toContain("##");
+    expect(result).toContain("\\frac{A}{B}");
+  });
+
+  test("renders heading when title is provided", () => {
+    const result = (
+      <RuleSet title="Evaluation Rules">
+        <Rule premises={["A"]} conclusion="B" />
+      </RuleSet>
+    );
+    expect(result).toStartWith("## Evaluation Rules\n\n");
+    expect(result).toContain("\\frac{A}{B}");
+  });
+
+  test("groups multiple rules", () => {
+    const result = (
+      <RuleSet title="Rules">
+        <Rule premises={["A"]} conclusion="B" name="R1" />
+        <Rule premises={["C"]} conclusion="D" name="R2" />
+      </RuleSet>
+    );
+    expect(result).toContain("\\text{ (R1)}");
+    expect(result).toContain("\\text{ (R2)}");
   });
 });
