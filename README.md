@@ -30,7 +30,7 @@ shiv install KnickKnackLabs/readme
 Create a `README.tsx` in your project root:
 
 ```tsx
-import { Heading, Paragraph, Bold, Section, CodeBlock } from "./src/components";
+import { Heading, Paragraph, Bold, Section, CodeBlock } from "readme";
 
 const readme = (
   <>
@@ -109,7 +109,7 @@ Auto-generated from `src/components/` exports. Each component carries a `.meta` 
 ```bash
 git clone https://github.com/KnickKnackLabs/readme.git
 cd readme && mise trust && mise install
-mise run build
+README_CALLER_PWD="$PWD" mise run build
 ```
 
 This README is itself generated from `README.tsx` — dogfooding all the way down.
