@@ -41,7 +41,7 @@ setup_readme_on_path() {
   mkdir -p "$mock_bin"
   cat > "$mock_bin/readme" <<MOCK
 #!/usr/bin/env bash
-export CALLER_PWD="\$PWD"
+export README_CALLER_PWD="\$PWD"
 exec mise -C "$REPO_DIR" run -q "\$@"
 MOCK
   chmod +x "$mock_bin/readme"

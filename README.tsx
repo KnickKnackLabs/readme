@@ -125,7 +125,7 @@ readme build --check      # Exit 1 if README.md is stale (for CI)`}</CodeBlock>
     <Section title="Development">
       <CodeBlock lang="bash">{`git clone https://github.com/KnickKnackLabs/readme.git
 cd readme && mise trust && mise install
-mise run build`}</CodeBlock>
+README_CALLER_PWD="$PWD" mise run build`}</CodeBlock>
 
       <Paragraph>
         This README is itself generated from <Code>README.tsx</Code> — dogfooding all the way down.
