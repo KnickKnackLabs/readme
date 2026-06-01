@@ -22,11 +22,30 @@ runs:
     - name: Build / check README
       shell: bash
       env:
-        README_CALLER_PWD: ${{ inputs.working-directory || github.workspace }}
+        ACTION_PATH: ${{ github.action_path }}
+        INPUT_CHECK: ${{ inputs.check }}
+        INPUT_WORKING_DIRECTORY: ${{ inputs.working-directory }}
+        WORKSPACE: ${{ github.workspace }}
       run: |
-        cd "${{ github.action_path }}"
-        if [[ "${{ inputs.check }}" == "true" ]]; then
-          mise run build -- --check
+        set -euo pipefail
+
+        target="$WORKSPACE"
+        if [[ -n "$INPUT_WORKING_DIRECTORY" ]]; then
+          if [[ "$INPUT_WORKING_DIRECTORY" = /* ]]; then
+            target="$INPUT_WORKING_DIRECTORY"
+          else
+            target="$WORKSPACE/$INPUT_WORKING_DIRECTORY"
+          fi
+        fi
+
+        if [[ ! -d "$target" ]]; then
+          echo "readme action: working-directory does not exist: $target" >&2
+          exit 1
+        fi
+        target="$(cd "$target" && pwd)"
+
+        if [[ "$INPUT_CHECK" == "true" ]]; then
+          README_CALLER_PWD="$target" mise -C "$ACTION_PATH" run build --check
         else
-          mise run build
+          README_CALLER_PWD="$target" mise -C "$ACTION_PATH" run build
         fi
