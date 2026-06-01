@@ -30,7 +30,7 @@ shiv install KnickKnackLabs/readme
 Create a `README.tsx` in your project root:
 
 ```tsx
-import { Heading, Paragraph, Bold, Section, CodeBlock } from "./src/components";
+import { Heading, Paragraph, Bold, Section, CodeBlock } from "readme";
 
 const readme = (
   <>
@@ -51,6 +51,25 @@ Then build:
 ```bash
 readme build              # README.tsx → README.md
 readme build --check      # Exit 1 if README.md is stale (for CI)
+```
+
+## GitHub Action
+
+Use the composite action to keep generated READMEs honest in CI:
+
+```yaml
+- uses: KnickKnackLabs/readme@v0.3.0
+  with:
+    check: true
+```
+
+For READMEs outside the workspace root, set `working-directory` to the directory containing `README.tsx`:
+
+```yaml
+- uses: KnickKnackLabs/readme@v0.3.0
+  with:
+    check: true
+    working-directory: docs
 ```
 
 ## Components (37)
@@ -111,7 +130,7 @@ Auto-generated from `src/components/` exports. Each component carries a `.meta` 
 ```bash
 git clone https://github.com/KnickKnackLabs/readme.git
 cd readme && mise trust && mise install
-mise run build
+README_CALLER_PWD="$PWD" mise run build
 ```
 
 This README is itself generated from `README.tsx` — dogfooding all the way down.
