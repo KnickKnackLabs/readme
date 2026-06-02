@@ -42,10 +42,7 @@ setup_readme_on_path() {
   cat > "$mock_bin/readme" <<MOCK
 #!/usr/bin/env bash
 export CALLER_PWD="\$PWD"
-# --force: the build task uses mise sources/outputs caching, resolved relative to
-# the readme repo's config root (via -C), not the consumer's. Forcing here keeps
-# cross-repo delegation from being skipped against the wrong repo's files.
-exec mise -C "$REPO_DIR" run -q --force "\$@"
+exec mise -C "$REPO_DIR" run -q "\$@"
 MOCK
   chmod +x "$mock_bin/readme"
   export PATH="$mock_bin:$PATH"
