@@ -14,3 +14,22 @@ export function escapeHtml(s: string): string {
 export function shieldsEncode(s: string): string {
   return encodeURIComponent(s).replaceAll("-", "--").replaceAll("_", "__");
 }
+
+export function slugify(text: string): string {
+  return text.toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]/g, "");
+}
+
+const UNICODE_TO_LATEX: [RegExp, string][] = [
+  [/&&/g, "\\mathbin{\\&\\&}"],
+  [/⟨/g, "\\langle "],
+  [/⟩/g, "\\rangle "],
+  [/⇓/g, "\\Downarrow "],
+  [/⇑/g, "\\Uparrow "],
+  [/≠/g, "\\neq "],
+  [/∈/g, "\\in "],
+  [/σ/g, "\\sigma"],
+];
+
+export function unicodeToLatex(s: string): string {
+  return UNICODE_TO_LATEX.reduce((acc, [re, latex]) => acc.replace(re, latex), s);
+}

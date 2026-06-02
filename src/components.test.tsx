@@ -1,6 +1,6 @@
 import { expect, test, describe } from "bun:test";
 import {
-  Bold, Italic, Code, Link, Image,
+  Bold, Italic, Code, Link, Image, Anchor,
   Heading, Paragraph, CodeBlock, Blockquote, HR, LineBreak,
   List, Item,
   Table, TableHead, TableRow, Cell,
@@ -12,8 +12,10 @@ import {
   Alert,
   box, labeledBox, sideBySide,
   TerminalImage,
+  Rule, RuleSet,
+  TOC,
 } from "./components";
-import { escapeHtml } from "./components/helpers";
+import { escapeHtml, slugify, unicodeToLatex } from "./components/helpers";
 
 // --- Inline elements ---
 
@@ -635,5 +637,220 @@ describe("TerminalImage", () => {
     expect(
       <TerminalImage src="docs/assets/terminal/abc123.svg" alt="demo" width={600} />
     ).toBe('<img src="docs/assets/terminal/abc123.svg" alt="demo" width="600" />');
+  });
+});
+
+// --- slugify helper ---
+
+describe("slugify", () => {
+  test("lowercases text", () => {
+    expect(slugify("Hello World")).toBe("hello-world");
+  });
+
+  test("replaces spaces with hyphens", () => {
+    expect(slugify("getting started")).toBe("getting-started");
+  });
+
+  test("strips non-word characters", () => {
+    expect(slugify("What's new?")).toBe("whats-new");
+  });
+
+  test("preserves existing hyphens", () => {
+    expect(slugify("step-by-step")).toBe("step-by-step");
+  });
+
+  test("handles multiple spaces", () => {
+    expect(slugify("a  b")).toBe("a-b");
+  });
+});
+
+// --- Anchor component ---
+
+describe("Anchor", () => {
+  test("renders in-page link", () => {
+    expect(<Anchor id="installation">Installation</Anchor>).toBe("[Installation](#installation)");
+  });
+
+  test("uses provided id verbatim", () => {
+    expect(<Anchor id="my-section">My Section</Anchor>).toBe("[My Section](#my-section)");
+  });
+});
+
+// --- TOC component ---
+
+describe("TOC", () => {
+  test("renders a single heading", () => {
+    expect(<TOC headings={[{ text: "Installation" }]} />).toBe("- [Installation](#installation)\n\n");
+  });
+
+  test("auto-slugs heading text when id is omitted", () => {
+    expect(<TOC headings={[{ text: "Getting Started" }]} />).toBe("- [Getting Started](#getting-started)\n\n");
+  });
+
+  test("uses explicit heading id when provided", () => {
+    expect(<TOC headings={[{ text: "Intro", id: "custom-id" }]} />).toBe("- [Intro](#custom-id)\n\n");
+  });
+
+  test("explicit heading ids support exact anchors and duplicates", () => {
+    const result = <TOC headings={[
+      { text: "Usage", id: "usage" },
+      { text: "Usage", id: "usage-1" },
+    ]} />;
+    expect(result).toBe("- [Usage](#usage)\n- [Usage](#usage-1)\n\n");
+  });
+
+  test("indents by heading level relative to minimum", () => {
+    const result = <TOC headings={[
+      { text: "Install", level: 1 },
+      { text: "Usage", level: 2 },
+      { text: "Advanced", level: 3 },
+    ]} />;
+    expect(result).toBe(
+      "- [Install](#install)\n" +
+      "  - [Usage](#usage)\n" +
+      "    - [Advanced](#advanced)\n\n"
+    );
+  });
+
+  test("heading indentation is relative — level 2 base has no leading indent", () => {
+    const result = <TOC headings={[
+      { text: "Usage", level: 2 },
+      { text: "Advanced", level: 3 },
+    ]} />;
+    expect(result).toBe(
+      "- [Usage](#usage)\n" +
+      "  - [Advanced](#advanced)\n\n"
+    );
+  });
+
+  test("entries prop supports arbitrary in-page links", () => {
+    expect(<TOC entries={[{ text: "API", id: "public-api" }]} />).toBe("- [API](#public-api)\n\n");
+  });
+
+  test("returns empty string for empty headings", () => {
+    expect(<TOC headings={[]} />).toBe("");
+  });
+
+  test("defaults heading level to 1 when omitted", () => {
+    const result = <TOC headings={[{ text: "A" }, { text: "B" }]} />;
+    expect(result).toBe("- [A](#a)\n- [B](#b)\n\n");
+  });
+});
+
+// --- unicodeToLatex helper ---
+
+describe("unicodeToLatex", () => {
+  test("converts angle brackets", () => {
+    expect(unicodeToLatex("⟨A⟩")).toBe("\\langle A\\rangle ");
+  });
+
+  test("converts Downarrow", () => {
+    expect(unicodeToLatex("⇓")).toBe("\\Downarrow ");
+  });
+
+  test("converts sigma", () => {
+    expect(unicodeToLatex("σ")).toBe("\\sigma");
+  });
+
+  test("converts && to mathbin", () => {
+    expect(unicodeToLatex("A && B")).toBe("A \\mathbin{\\&\\&} B");
+  });
+
+  test("leaves plain text unchanged", () => {
+    expect(unicodeToLatex("hello")).toBe("hello");
+  });
+
+  test("converts a realistic premise string", () => {
+    const result = unicodeToLatex("⟨A, σ⟩ ⇓ (0, σ')");
+    expect(result).toContain("\\langle");
+    expect(result).toContain("\\rangle");
+    expect(result).toContain("\\Downarrow");
+    expect(result).toContain("\\sigma");
+  });
+});
+
+// --- Rule component ---
+
+describe("Rule", () => {
+  test("renders a math fenced block", () => {
+    const result = <Rule premises={["A"]} conclusion="B" />;
+    expect(result).toStartWith("```math\n");
+    expect(result).toContain("\\frac{A}{B}");
+    expect(result).toEndWith("```\n\n");
+  });
+
+  test("appends name label when provided", () => {
+    const result = <Rule premises={["A"]} conclusion="B" name="MyRule" />;
+    expect(result).toContain("\\text{ (MyRule)}");
+  });
+
+  test("omits label when name is not provided", () => {
+    const result = <Rule premises={["A"]} conclusion="B" />;
+    expect(result).not.toContain("\\text");
+  });
+
+  test("joins multiple premises with \\quad", () => {
+    const result = <Rule premises={["P1", "P2", "P3"]} conclusion="C" />;
+    expect(result).toContain("P1 \\quad P2 \\quad P3");
+  });
+
+  test("converts Unicode symbols in premises and conclusion", () => {
+    const result = <Rule
+      premises={["⟨A, σ⟩ ⇓ (0, σ')"]}
+      conclusion="⟨A && B, σ⟩ ⇓ (0, σ')"
+      name="And-Success"
+    />;
+    expect(result).toContain("\\langle");
+    expect(result).toContain("\\Downarrow");
+    expect(result).toContain("\\sigma");
+    expect(result).toContain("\\mathbin{\\&\\&}");
+    expect(result).toContain("\\text{ (And-Success)}");
+  });
+
+  test("renders exact output from issue example", () => {
+    const result = <Rule
+      premises={["⟨A, σ⟩ ⇓ (0, σ')", "⟨B, σ'⟩ ⇓ (n, σ'')"]}
+      conclusion="⟨A && B, σ⟩ ⇓ (n, σ'')"
+      name="And-Success"
+    />;
+    expect(result).toStartWith("```math\n\\frac{");
+    expect(result).toContain("\\quad");
+    expect(result).toContain("\\text{ (And-Success)}");
+    expect(result).toEndWith("```\n\n");
+  });
+});
+
+// --- RuleSet component ---
+
+describe("RuleSet", () => {
+  test("renders children without a title", () => {
+    const result = (
+      <RuleSet>
+        <Rule premises={["A"]} conclusion="B" />
+      </RuleSet>
+    );
+    expect(result).not.toContain("##");
+    expect(result).toContain("\\frac{A}{B}");
+  });
+
+  test("renders heading when title is provided", () => {
+    const result = (
+      <RuleSet title="Evaluation Rules">
+        <Rule premises={["A"]} conclusion="B" />
+      </RuleSet>
+    );
+    expect(result).toStartWith("## Evaluation Rules\n\n");
+    expect(result).toContain("\\frac{A}{B}");
+  });
+
+  test("groups multiple rules", () => {
+    const result = (
+      <RuleSet title="Rules">
+        <Rule premises={["A"]} conclusion="B" name="R1" />
+        <Rule premises={["C"]} conclusion="D" name="R2" />
+      </RuleSet>
+    );
+    expect(result).toContain("\\text{ (R1)}");
+    expect(result).toContain("\\text{ (R2)}");
   });
 });

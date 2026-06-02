@@ -20,7 +20,7 @@ describe("cross-repo build", () => {
     await writeFile(
       join(dir, "README.tsx"),
       `/** @jsxImportSource jsx-md */
-import { Heading, Paragraph, Bold } from "readme/src/components";
+import { Heading, Paragraph, Bold } from "readme";
 
 const readme = (
   <>
@@ -41,6 +41,7 @@ console.log(readme);
           paths: {
             "jsx-md/jsx-runtime": [`${REPO_DIR}/src/jsx-runtime.ts`],
             "jsx-md/jsx-dev-runtime": [`${REPO_DIR}/src/jsx-dev-runtime.ts`],
+            "readme": [`${REPO_DIR}/index.ts`],
             "readme/*": [`${REPO_DIR}/*`],
           },
         },
@@ -68,7 +69,7 @@ console.log(readme);
     // Same file but WITHOUT the pragma — should fail to use our runtime
     await writeFile(
       join(dir, "README.tsx"),
-      `import { Heading, Paragraph, Bold } from "readme/src/components";
+      `import { Heading, Paragraph, Bold } from "readme";
 
 const readme = (
   <>
@@ -89,6 +90,7 @@ console.log(readme);
           paths: {
             "jsx-md/jsx-runtime": [`${REPO_DIR}/src/jsx-runtime.ts`],
             "jsx-md/jsx-dev-runtime": [`${REPO_DIR}/src/jsx-dev-runtime.ts`],
+            "readme": [`${REPO_DIR}/index.ts`],
             "readme/*": [`${REPO_DIR}/*`],
           },
         },

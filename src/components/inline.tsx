@@ -27,3 +27,8 @@ export function Image({ src, alt, width }: { src: string; alt: string; width?: n
   return `![${alt}](${src})`;
 }
 Image.meta = { usage: '<Image src="..." alt="..." />', output: "![alt](src) or HTML with width" } satisfies ComponentMeta;
+
+export function Anchor({ id, children: c }: { id: string; children: string }) {
+  return `[${c}](#${id})`;
+}
+Anchor.meta = { usage: '<Anchor id="section">text</Anchor>', output: "[text](#section)" } satisfies ComponentMeta;
