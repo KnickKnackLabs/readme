@@ -72,7 +72,7 @@ For READMEs outside the workspace root, set `working-directory` to the directory
     working-directory: docs
 ```
 
-## Components (37)
+## Components (39)
 
 Auto-generated from `src/components/` exports. Each component carries a `.meta` property describing its usage.
 
@@ -81,6 +81,7 @@ Auto-generated from `src/components/` exports. Each component carries a `.meta` 
 | `<Alert type="WARNING">text</Alert>` | &gt; [!WARNING]
 &gt; text |
 | `<Align align="center">...</Align>` | &lt;p align="..."&gt; |
+| `<Anchor id="section">text</Anchor>` | [text](#section) |
 | `<Badge label=... value=... />` | shields.io badge |
 | `<Badges>...</Badges>` | Badge row with spacing |
 | `<Blockquote>text</Blockquote>` | &gt; text |
@@ -111,6 +112,7 @@ Auto-generated from `src/components/` exports. Each component carries a `.meta` 
 | `<RuleSet title="Rules"><Rule ... /></RuleSet>` | Optional heading followed by grouped Rule blocks |
 | `<Section title=... level=...>` | Heading + content block |
 | `<Sub>text</Sub>` | &lt;sub&gt; tag |
+| `<TOC headings={[{ text: "Usage", level: 2 }]} />` | Nested heading links; pass id for exact anchors |
 | `<Table>...</Table>` | GFM table (Prettier-compatible padding) |
 | `<TableHead><Cell>...</Cell></TableHead>` | Header row + separator |
 | `<TableRow><Cell>...</Cell></TableRow>` | Table data row |

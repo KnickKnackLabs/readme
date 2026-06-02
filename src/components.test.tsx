@@ -1,6 +1,6 @@
 import { expect, test, describe } from "bun:test";
 import {
-  Bold, Italic, Code, Link, Image,
+  Bold, Italic, Code, Link, Image, Anchor,
   Heading, Paragraph, CodeBlock, Blockquote, HR, LineBreak,
   List, Item,
   Table, TableHead, TableRow, Cell,
@@ -12,8 +12,9 @@ import {
   Alert,
   box, labeledBox, sideBySide,
   Rule, RuleSet,
+  TOC,
 } from "./components";
-import { escapeHtml, unicodeToLatex } from "./components/helpers";
+import { escapeHtml, slugify, unicodeToLatex } from "./components/helpers";
 
 // --- Inline elements ---
 
@@ -619,6 +620,103 @@ describe("Chat", () => {
     expect(result).toContain("**bob**");
     expect(result).toContain("> hi");
     expect(result).toContain("> hey");
+  });
+});
+
+// --- slugify helper ---
+
+describe("slugify", () => {
+  test("lowercases text", () => {
+    expect(slugify("Hello World")).toBe("hello-world");
+  });
+
+  test("replaces spaces with hyphens", () => {
+    expect(slugify("getting started")).toBe("getting-started");
+  });
+
+  test("strips non-word characters", () => {
+    expect(slugify("What's new?")).toBe("whats-new");
+  });
+
+  test("preserves existing hyphens", () => {
+    expect(slugify("step-by-step")).toBe("step-by-step");
+  });
+
+  test("handles multiple spaces", () => {
+    expect(slugify("a  b")).toBe("a-b");
+  });
+});
+
+// --- Anchor component ---
+
+describe("Anchor", () => {
+  test("renders in-page link", () => {
+    expect(<Anchor id="installation">Installation</Anchor>).toBe("[Installation](#installation)");
+  });
+
+  test("uses provided id verbatim", () => {
+    expect(<Anchor id="my-section">My Section</Anchor>).toBe("[My Section](#my-section)");
+  });
+});
+
+// --- TOC component ---
+
+describe("TOC", () => {
+  test("renders a single heading", () => {
+    expect(<TOC headings={[{ text: "Installation" }]} />).toBe("- [Installation](#installation)\n\n");
+  });
+
+  test("auto-slugs heading text when id is omitted", () => {
+    expect(<TOC headings={[{ text: "Getting Started" }]} />).toBe("- [Getting Started](#getting-started)\n\n");
+  });
+
+  test("uses explicit heading id when provided", () => {
+    expect(<TOC headings={[{ text: "Intro", id: "custom-id" }]} />).toBe("- [Intro](#custom-id)\n\n");
+  });
+
+  test("explicit heading ids support exact anchors and duplicates", () => {
+    const result = <TOC headings={[
+      { text: "Usage", id: "usage" },
+      { text: "Usage", id: "usage-1" },
+    ]} />;
+    expect(result).toBe("- [Usage](#usage)\n- [Usage](#usage-1)\n\n");
+  });
+
+  test("indents by heading level relative to minimum", () => {
+    const result = <TOC headings={[
+      { text: "Install", level: 1 },
+      { text: "Usage", level: 2 },
+      { text: "Advanced", level: 3 },
+    ]} />;
+    expect(result).toBe(
+      "- [Install](#install)\n" +
+      "  - [Usage](#usage)\n" +
+      "    - [Advanced](#advanced)\n\n"
+    );
+  });
+
+  test("heading indentation is relative — level 2 base has no leading indent", () => {
+    const result = <TOC headings={[
+      { text: "Usage", level: 2 },
+      { text: "Advanced", level: 3 },
+    ]} />;
+    expect(result).toBe(
+      "- [Usage](#usage)\n" +
+      "  - [Advanced](#advanced)\n\n"
+    );
+  });
+
+  test("entries prop supports arbitrary in-page links", () => {
+    expect(<TOC entries={[{ text: "API", id: "public-api" }]} />).toBe("- [API](#public-api)\n\n");
+  });
+
+  test("returns empty string for empty headings", () => {
+    expect(<TOC headings={[]} />).toBe("");
+  });
+
+  test("defaults heading level to 1 when omitted", () => {
+    const result = <TOC headings={[{ text: "A" }, { text: "B" }]} />;
+    expect(result).toBe("- [A](#a)\n- [B](#b)\n\n");
   });
 });
 
