@@ -58,7 +58,7 @@ readme build --check      # Exit 1 if README.md is stale (for CI)
 Use the composite action to keep generated READMEs honest in CI:
 
 ```yaml
-- uses: KnickKnackLabs/readme@v0.3.0
+- uses: KnickKnackLabs/readme@v0.3.1
   with:
     check: true
 ```
@@ -66,7 +66,7 @@ Use the composite action to keep generated READMEs honest in CI:
 For READMEs outside the workspace root, set `working-directory` to the directory containing `README.tsx`:
 
 ```yaml
-- uses: KnickKnackLabs/readme@v0.3.0
+- uses: KnickKnackLabs/readme@v0.3.1
   with:
     check: true
     working-directory: docs

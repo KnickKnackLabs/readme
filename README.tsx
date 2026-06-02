@@ -95,7 +95,7 @@ readme build --check      # Exit 1 if README.md is stale (for CI)`}</CodeBlock>
         Use the composite action to keep generated READMEs honest in CI:
       </Paragraph>
 
-      <CodeBlock lang="yaml">{`- uses: KnickKnackLabs/readme@v0.3.0
+      <CodeBlock lang="yaml">{`- uses: KnickKnackLabs/readme@v0.3.1
   with:
     check: true`}</CodeBlock>
 
@@ -104,7 +104,7 @@ readme build --check      # Exit 1 if README.md is stale (for CI)`}</CodeBlock>
         {" to the directory containing "}<Code>README.tsx</Code>:
       </Paragraph>
 
-      <CodeBlock lang="yaml">{`- uses: KnickKnackLabs/readme@v0.3.0
+      <CodeBlock lang="yaml">{`- uses: KnickKnackLabs/readme@v0.3.1
   with:
     check: true
     working-directory: docs`}</CodeBlock>

@@ -15,7 +15,7 @@ runs:
   using: composite
   steps:
     - name: Install mise
-      uses: jdx/mise-action@v2
+      uses: jdx/mise-action@v4
       with:
         working_directory: ${{ github.action_path }}
 
