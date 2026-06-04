@@ -33,3 +33,58 @@ TSX
   [ "$status" -eq 0 ]
   echo "$output" | grep -q "README.md is up to date"
 }
+
+# --- --file / --output ---
+
+# Write a second TSX source under the target repo (optionally in a subdir).
+make_guide() {
+  local rel="$1" word="${2:-Guide}"
+  mkdir -p "$TARGET_REPO/$(dirname "$rel")"
+  cat > "$TARGET_REPO/$rel" <<TSX
+/** @jsxImportSource jsx-md */
+import { Heading } from "readme/src/components";
+const readme = <Heading level={1}>$word</Heading>;
+console.log(readme);
+TSX
+}
+
+@test "build --file renders the named TSX to the auto-mapped .md" {
+  make_guide "docs/Guide.tsx" "GuideDoc"
+
+  run bash -c "README_CALLER_PWD='$TARGET_REPO' mise -C '$REPO_DIR' run -q build --file docs/Guide.tsx"
+  [ "$status" -eq 0 ]
+  grep -q "GuideDoc" "$TARGET_REPO/docs/Guide.md"
+  # default README.md must not be created as a side effect
+  [ ! -f "$TARGET_REPO/README.md" ]
+}
+
+@test "build --output overrides the destination" {
+  make_guide "Guide.tsx" "GuideDoc"
+
+  run bash -c "README_CALLER_PWD='$TARGET_REPO' mise -C '$REPO_DIR' run -q build --file Guide.tsx --output out/custom.md"
+  [ "$status" -eq 0 ]
+  grep -q "GuideDoc" "$TARGET_REPO/out/custom.md"
+  [ ! -f "$TARGET_REPO/Guide.md" ]
+}
+
+@test "build --check on a --file target is fail-closed" {
+  make_guide "docs/Guide.tsx" "GuideDoc"
+  README_CALLER_PWD="$TARGET_REPO" mise -C "$REPO_DIR" run -q build --file docs/Guide.tsx
+
+  # fresh -> up to date
+  run bash -c "README_CALLER_PWD='$TARGET_REPO' mise -C '$REPO_DIR' run -q build --file docs/Guide.tsx --check"
+  [ "$status" -eq 0 ]
+  echo "$output" | grep -q "Guide.md is up to date"
+
+  # stale -> exit 1
+  printf '\nBROKEN MANUAL EDIT\n' >> "$TARGET_REPO/docs/Guide.md"
+  run bash -c "README_CALLER_PWD='$TARGET_REPO' mise -C '$REPO_DIR' run -q build --file docs/Guide.tsx --check"
+  [ "$status" -ne 0 ]
+  echo "$output" | grep -q "Guide.md is out of date"
+}
+
+@test "build --file errors when the source is missing" {
+  run bash -c "README_CALLER_PWD='$TARGET_REPO' mise -C '$REPO_DIR' run -q build --file docs/Missing.tsx"
+  [ "$status" -ne 0 ]
+  echo "$output" | grep -q "No Missing.tsx found"
+}
