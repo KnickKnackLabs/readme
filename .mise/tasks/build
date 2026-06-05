@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #MISE description="Generate README.md from README.tsx"
-#USAGE flag "--check" help="Check if the output is up to date (exit 1 if stale)"
-#USAGE flag "--file <file>" help="TSX source to build (default: README.tsx in the target dir)"
-#USAGE flag "--output <output>" help="Markdown output path (default: source with .tsx->.md)"
+#USAGE flag "--check" help="Check if the output is up to date (exit 1 if stale)" default=#false
+#USAGE flag "--file <file>" help="TSX source to build (default: README.tsx in the target dir)" default=""
+#USAGE flag "--output <output>" help="Markdown output path (default: source with .tsx->.md)" default=""
 set -e
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"

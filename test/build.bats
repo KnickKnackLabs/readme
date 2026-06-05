@@ -88,3 +88,12 @@ TSX
   [ "$status" -ne 0 ]
   echo "$output" | grep -q "No Missing.tsx found"
 }
+
+@test "build without --file ignores stale usage_file env" {
+  make_guide "Other.tsx" "OtherDoc"
+
+  run bash -c "usage_file=Other.tsx README_CALLER_PWD='$TARGET_REPO' mise -C '$REPO_DIR' run -q build"
+  [ "$status" -eq 0 ]
+  grep -q "Hello" "$TARGET_REPO/README.md"
+  [ ! -f "$TARGET_REPO/Other.md" ]
+}
