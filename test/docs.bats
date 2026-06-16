@@ -16,6 +16,10 @@ TASK
   chmod +x "$TARGET_REPO/.mise/tasks/build"
 }
 
+mtime() {
+  stat -f "%m" "$1" 2>/dev/null || stat -c "%Y" "$1"
+}
+
 @test "docs requires README_CALLER_PWD even when mise -C runs from the package" {
   run bash -c "cd '$TARGET_REPO' && mise -C '$REPO_DIR' run -q docs"
   [ "$status" -ne 0 ]
@@ -26,19 +30,20 @@ TASK
   README_CALLER_PWD="$TARGET_REPO" mise -C "$REPO_DIR" run -q docs
 
   [ -f "$TARGET_REPO/docs/index.html" ]
+  grep -q "<h1>project</h1>" "$TARGET_REPO/docs/index.html"
   grep -q "build" "$TARGET_REPO/docs/index.html"
   grep -q "Build the project" "$TARGET_REPO/docs/index.html"
 }
 
 @test "docs is content-aware — skips rewrite when content unchanged" {
   README_CALLER_PWD="$TARGET_REPO" mise -C "$REPO_DIR" run -q docs
-  # Capture mtime
-  mtime_before=$(stat -c %Y "$TARGET_REPO/docs/index.html")
+  mtime_before=$(mtime "$TARGET_REPO/docs/index.html")
 
-  # Run again
+  sleep 1
   run bash -c "README_CALLER_PWD='$TARGET_REPO' mise -C '$REPO_DIR' run -q docs"
-  mtime_after=$(stat -c %Y "$TARGET_REPO/docs/index.html")
+  mtime_after=$(mtime "$TARGET_REPO/docs/index.html")
 
+  [ "$status" -eq 0 ]
   echo "$output" | grep -q "already up to date"
   [ "$mtime_before" -eq "$mtime_after" ]
 }
@@ -60,6 +65,25 @@ TASK
   [ "$status" -eq 0 ]
   grep -q "https://github.com/user/tool" "$TARGET_REPO/docs/index.html"
   grep -q "Issues" "$TARGET_REPO/docs/index.html"
+}
+
+@test "docs defaults repo URL from git remote" {
+  git -C "$TARGET_REPO" init -q -b main
+  git -C "$TARGET_REPO" remote add origin git@github.com:KnickKnackLabs/readme.git
+
+  README_CALLER_PWD="$TARGET_REPO" mise -C "$REPO_DIR" run -q docs
+
+  grep -q "https://github.com/KnickKnackLabs/readme" "$TARGET_REPO/docs/index.html"
+  grep -q "https://github.com/KnickKnackLabs/readme/issues" "$TARGET_REPO/docs/index.html"
+}
+
+@test "docs without flags ignores stale usage env" {
+  run bash -c "usage_name='Wrong Tool' usage_tagline='Wrong tagline' usage_repo='https://example.com/wrong' README_CALLER_PWD='$TARGET_REPO' mise -C '$REPO_DIR' run -q docs"
+  [ "$status" -eq 0 ]
+  grep -q "<h1>project</h1>" "$TARGET_REPO/docs/index.html"
+  ! grep -q "Wrong Tool" "$TARGET_REPO/docs/index.html"
+  ! grep -q "Wrong tagline" "$TARGET_REPO/docs/index.html"
+  ! grep -q "https://example.com/wrong" "$TARGET_REPO/docs/index.html"
 }
 
 @test "docs shows noop message when target has no .mise/tasks" {

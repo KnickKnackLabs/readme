@@ -131,6 +131,25 @@ describe("renderDocsHtml", () => {
     expect(html).toContain("(default: markdown)");
   });
 
+  it("omits empty string defaults from flag descriptions", () => {
+    const html = renderDocsHtml({
+      name: "my-tool",
+      commands: [
+        {
+          name: "docs",
+          description: "Generate docs",
+          flags: [
+            { name: "--name", help: "Project name", isBoolean: false, valueName: "text", default: "" },
+          ],
+          args: [],
+          hidden: false,
+        },
+      ],
+    });
+    expect(html).toContain("Project name");
+    expect(html).not.toContain("(default: )");
+  });
+
   it("renders args with optional markers", () => {
     const html = renderDocsHtml({
       name: "my-tool",

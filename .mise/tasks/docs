@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #MISE description="Generate docs/index.html command reference from .mise/tasks"
-#USAGE flag "--name <text>" help="Project display name (default: target dir basename)"
-#USAGE flag "--tagline <text>" help="One-line project tagline"
-#USAGE flag "--repo <url>" help="GitHub repo URL (default: from git remote)"
+#USAGE flag "--name <text>" help="Project display name (default: target dir basename)" default=""
+#USAGE flag "--tagline <text>" help="One-line project tagline" default=""
+#USAGE flag "--repo <url>" help="GitHub repo URL (default: from git remote)" default=""
 set -e
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"

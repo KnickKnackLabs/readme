@@ -118,7 +118,7 @@ function renderCommandHtml(cmd: MiseCommand): string {
     for (const flag of cmd.flags) {
       const flagStr = renderFlagName(flag);
       const helpParts: string[] = [escapeHtml(flag.help)];
-      if (flag.default !== undefined) helpParts.push(`(default: ${escapeHtml(flag.default)})`);
+      if (flag.default) helpParts.push(`(default: ${escapeHtml(flag.default)})`);
       if (flag.required) helpParts.push("(required)");
       parts.push(`<tr><td>${escapeHtml(flagStr)}</td><td>${helpParts.join(" ")}</td></tr>`);
     }

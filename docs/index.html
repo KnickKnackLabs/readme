@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>knickknacklabs</title>
+  <title>readme</title>
   <style>body {
       font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
       background: #0d1117;
@@ -45,13 +45,15 @@
     .optional { color: #8b949e; font-size: 0.85rem; }</style>
 </head>
 <body>
-<h1>knickknacklabs</h1>
+<h1>readme</h1>
 <h2>build</h2>
 <p class="dim">Generate README.md from README.tsx</p>
-<code>build [--check]</code>
+<code>build [--check] [--file <file>] [--output <output>]</code>
 <table>
 <tr><th>Flag</th><th>Description</th></tr>
-<tr><td>--check</td><td>Check if README.md is up to date (exit 1 if stale)</td></tr>
+<tr><td>--check</td><td>Check if the output is up to date (exit 1 if stale)</td></tr>
+<tr><td>--file &lt;file&gt;</td><td>TSX source to build (default: README.tsx in the target dir)</td></tr>
+<tr><td>--output &lt;output&gt;</td><td>Markdown output path (default: source with .tsx-&gt;.md)</td></tr>
 </table>
 <h2>docs</h2>
 <p class="dim">Generate docs/index.html command reference from .mise/tasks</p>
@@ -76,6 +78,6 @@
 <h2>test</h2>
 <p class="dim">Run test suite</p>
 <code>test</code>
-<div class="links"><a href="https://github.com/olavostauros/readme">GitHub</a> &middot; <a href="https://github.com/olavostauros/readme/issues">Issues</a></div>
+<div class="links"><a href="https://github.com/KnickKnackLabs/readme">GitHub</a> &middot; <a href="https://github.com/KnickKnackLabs/readme/issues">Issues</a></div>
 </body>
 </html>

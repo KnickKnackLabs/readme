@@ -7,29 +7,30 @@
 // The mise task captures stdout, compares with existing output, and
 // writes only on content change (content-aware write per #15).
 
-import { readFileSync, existsSync } from "fs";
-import { join, dirname } from "path";
+import { existsSync } from "fs";
+import { execFileSync } from "child_process";
+import { basename, join } from "path";
 import { parseTasks } from "./lib/mise";
 import { renderDocsHtml } from "./lib/docs";
 
+function normalizeRepoUrl(url: string): string {
+  return url.replace(/^git@([^:]+):/, "https://$1/").replace(/\.git$/, "");
+}
+
 function getDefaultRepoUrl(targetDir: string): string | undefined {
-  // Try to read git remote from the target directory
-  const gitConfig = join(targetDir, ".git", "config");
-  if (existsSync(gitConfig)) {
-    const config = readFileSync(gitConfig, "utf-8");
-    const match = config.match(/\[remote "origin"\][\s\S]*?\n\turl = (.+)/);
-    if (match) {
-      let url = match[1].trim();
-      // Convert git@github.com:KnickKnackLabs/repo.git → https form
-      url = url.replace(/^git@([^:]+):/, "https://$1/").replace(/\.git$/, "");
-      return url;
-    }
+  try {
+    const url = execFileSync("git", ["-C", targetDir, "config", "--get", "remote.origin.url"], {
+      encoding: "utf-8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+    return url ? normalizeRepoUrl(url) : undefined;
+  } catch {
+    return undefined;
   }
-  return undefined;
 }
 
 function getDefaultName(targetDir: string): string {
-  return dirname(targetDir).split("/").pop() || "project";
+  return basename(targetDir) || "project";
 }
 
 const targetDir = process.env.README_CALLER_PWD;
