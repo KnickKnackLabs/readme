@@ -3,6 +3,8 @@
 // Bun calls jsx() / jsxs() for every <Tag> in a .tsx file.
 // Instead of building a DOM tree, we return plain strings.
 
+import { flatten } from "./components/helpers";
+
 export function jsx(
   tag: string | Function,
   props: Record<string, any>,
@@ -14,12 +16,6 @@ export function jsx(
 }
 
 export const jsxs = jsx;
-
-function flatten(c: any): string {
-  if (c == null) return "";
-  if (Array.isArray(c)) return c.map(flatten).join("");
-  return String(c);
-}
 
 export function Fragment({ children }: { children?: any }): string {
   return flatten(children);

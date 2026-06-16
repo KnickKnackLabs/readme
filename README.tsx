@@ -69,7 +69,7 @@ const readme = (
         Create a <Code>README.tsx</Code> in your project root:
       </Paragraph>
 
-      <CodeBlock lang="tsx">{`import { Heading, Paragraph, Bold, Section, CodeBlock } from "./src/components";
+      <CodeBlock lang="tsx">{`import { Heading, Paragraph, Bold, Section, CodeBlock } from "readme";
 
 const readme = (
   <>
@@ -88,6 +88,26 @@ console.log(readme);`}</CodeBlock>
 
       <CodeBlock lang="bash">{`readme build              # README.tsx → README.md
 readme build --check      # Exit 1 if README.md is stale (for CI)`}</CodeBlock>
+    </Section>
+
+    <Section title="GitHub Action">
+      <Paragraph>
+        Use the composite action to keep generated READMEs honest in CI:
+      </Paragraph>
+
+      <CodeBlock lang="yaml">{`- uses: KnickKnackLabs/readme@v0.3.1
+  with:
+    check: true`}</CodeBlock>
+
+      <Paragraph>
+        For READMEs outside the workspace root, set <Code>working-directory</Code>
+        {" to the directory containing "}<Code>README.tsx</Code>:
+      </Paragraph>
+
+      <CodeBlock lang="yaml">{`- uses: KnickKnackLabs/readme@v0.3.1
+  with:
+    check: true
+    working-directory: docs`}</CodeBlock>
     </Section>
 
     <Section title={`Components (${componentRows.length})`}>
@@ -125,7 +145,7 @@ readme build --check      # Exit 1 if README.md is stale (for CI)`}</CodeBlock>
     <Section title="Development">
       <CodeBlock lang="bash">{`git clone https://github.com/KnickKnackLabs/readme.git
 cd readme && mise trust && mise install
-mise run build`}</CodeBlock>
+README_CALLER_PWD="$PWD" mise run build`}</CodeBlock>
 
       <Paragraph>
         This README is itself generated from <Code>README.tsx</Code> — dogfooding all the way down.

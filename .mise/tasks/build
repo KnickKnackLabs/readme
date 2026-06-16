@@ -1,10 +1,50 @@
 #!/usr/bin/env bash
 #MISE description="Generate README.md from README.tsx"
-#USAGE flag "--check" help="Check if README.md is up to date (exit 1 if stale)"
+#USAGE flag "--check" help="Check if the output is up to date (exit 1 if stale)" default=#false
+#USAGE flag "--file <file>" help="TSX source to build (default: README.tsx in the target dir)" default=""
+#USAGE flag "--output <output>" help="Markdown output path (default: source with .tsx->.md)" default=""
 set -e
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-TARGET_DIR="${CALLER_PWD:-$REPO_DIR}"
+
+if [[ -z "${README_CALLER_PWD:-}" ]]; then
+  echo "Error: README_CALLER_PWD is not set." >&2
+  echo "readme build must be run through the installed readme shim, or with" >&2
+  echo "README_CALLER_PWD set to the directory containing README.tsx, e.g.:" >&2
+  echo "  README_CALLER_PWD=\"\$PWD\" mise -C \"$REPO_DIR\" run build --check" >&2
+  exit 1
+fi
+
+TARGET_DIR="$README_CALLER_PWD"
+
+# Resolve the source (input) and output paths. Defaults preserve the
+# directory-based contract (README.tsx -> README.md); --file targets a specific
+# TSX source and --output overrides the destination. Relative paths resolve
+# against the caller's directory; absolute paths are honored as-is.
+resolve_path() {
+  case "$1" in
+    /*) printf '%s\n' "$1" ;;
+    *) printf '%s/%s\n' "$TARGET_DIR" "$1" ;;
+  esac
+}
+
+if [[ -n "${usage_file:-}" ]]; then
+  SRC_FILE="$(resolve_path "$usage_file")"
+else
+  SRC_FILE="$TARGET_DIR/README.tsx"
+fi
+
+if [[ -n "${usage_output:-}" ]]; then
+  OUT_FILE="$(resolve_path "$usage_output")"
+elif [[ -n "${usage_file:-}" ]]; then
+  if [[ "$SRC_FILE" != *.tsx ]]; then
+    echo "Error: --file '$usage_file' does not end in .tsx; pass --output explicitly." >&2
+    exit 1
+  fi
+  OUT_FILE="${SRC_FILE%.tsx}.md"
+else
+  OUT_FILE="$TARGET_DIR/README.md"
+fi
 
 # Bun's --tsconfig-override is broken for jsxImportSource (oven-sh/bun#22023),
 # but it does work for paths. So we split the responsibility:
@@ -17,7 +57,7 @@ cat > "$TSCONFIG" <<CONF
     "paths": {
       "jsx-md/jsx-runtime": ["$REPO_DIR/src/jsx-runtime.ts"],
       "jsx-md/jsx-dev-runtime": ["$REPO_DIR/src/jsx-dev-runtime.ts"],
-      "readme": ["$REPO_DIR/src/index.ts"],
+      "readme": ["$REPO_DIR/index.ts"],
       "readme/*": ["$REPO_DIR/*"]
     }
   }
@@ -25,32 +65,40 @@ cat > "$TSCONFIG" <<CONF
 CONF
 trap 'rm -f "$TSCONFIG"' EXIT
 
-if [[ ! -f "$TARGET_DIR/README.tsx" ]]; then
-  echo "No README.tsx found in $TARGET_DIR"
+if [[ ! -f "$SRC_FILE" ]]; then
+  echo "No $(basename "$SRC_FILE") found in $(dirname "$SRC_FILE")"
   exit 1
 fi
 
 # Generate markdown from TSX
 # Filter the spurious "directory mismatch" warning from oven-sh/bun#22023
-output=$(bun run --tsconfig-override "$TSCONFIG" "$TARGET_DIR/README.tsx" 2> >(grep -v "Internal error: directory mismatch" >&2))
+output=$(bun run --tsconfig-override "$TSCONFIG" "$SRC_FILE" 2> >(grep -v "Internal error: directory mismatch" >&2))
 
 if [[ "${usage_check}" == "true" ]]; then
-  if [[ ! -f "$TARGET_DIR/README.md" ]]; then
-    echo "README.md does not exist. Run 'readme build' to generate it."
+  if [[ ! -f "$OUT_FILE" ]]; then
+    echo "$(basename "$OUT_FILE") does not exist. Run 'readme build' to generate it."
     exit 1
   fi
 
-  if ! diff -u "$TARGET_DIR/README.md" <(echo "$output") > /dev/null 2>&1; then
-    echo "README.md is out of date. Run 'readme build' to update it."
+  if ! diff -u "$OUT_FILE" <(echo "$output") > /dev/null 2>&1; then
+    echo "$(basename "$OUT_FILE") is out of date. Run 'readme build' to update it."
     echo ""
-    diff -u "$TARGET_DIR/README.md" <(echo "$output") || true
+    diff -u "$OUT_FILE" <(echo "$output") || true
     exit 1
   fi
 
-  echo "README.md is up to date."
+  echo "$(basename "$OUT_FILE") is up to date."
   exit 0
 fi
 
-# Write output
-echo "$output" > "$TARGET_DIR/README.md"
-echo "Generated README.md"
+# Write output, but skip the rewrite when the rendered content already matches.
+# This is a content-aware cache (not mtime-based): it avoids needless writes and
+# mtime churn without ever masking a stale file, and works for any resolved
+# output path (default README.md, auto-mapped --file output, or explicit --output).
+mkdir -p "$(dirname "$OUT_FILE")"
+if [[ -f "$OUT_FILE" ]] && diff -q "$OUT_FILE" <(echo "$output") > /dev/null 2>&1; then
+  echo "$(basename "$OUT_FILE") already up to date"
+else
+  echo "$output" > "$OUT_FILE"
+  echo "Generated $(basename "$OUT_FILE")"
+fi

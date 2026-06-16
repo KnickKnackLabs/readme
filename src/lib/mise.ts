@@ -13,7 +13,7 @@
 //   const tasks = parseTasks(".mise/tasks");          // MiseCommand[]
 //   const { count, files } = countBatsTests("test");  // { count, files }
 
-import { readFileSync, readdirSync, existsSync } from "fs";
+import { readFileSync, readdirSync, existsSync, statSync } from "fs";
 import { join } from "path";
 
 export interface MiseFlag {
@@ -73,21 +73,25 @@ function stringAttr(attrs: UsageAttrs, key: string): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
 
+function isExecutableFile(filepath: string): boolean {
+  return (statSync(filepath).mode & 0o111) !== 0;
+}
+
 function parseTaskFile(filepath: string, name: string): MiseCommand {
   const lines = readFileSync(filepath, "utf-8").split("\n");
 
   const description =
-    lines.find((l) => l.startsWith("#MISE description="))
-      ?.match(/#MISE description="(.+)"/)?.[1] ?? "";
+    lines.find((l) => /^\s*(?:#|\/\/)MISE description=/.test(l))
+      ?.match(/^\s*(?:#|\/\/)MISE description="(.+)"/)?.[1] ?? "";
 
-  const hidden = lines.some((l) => l.includes("#MISE hide=true"));
+  const hidden = lines.some((l) => /^\s*(?:#|\/\/)MISE hide=true\b/.test(l));
 
   const flags: MiseFlag[] = [];
   const args: MiseArg[] = [];
 
   for (const line of lines) {
     const flagMatch = line.match(
-      /#USAGE flag "(-[\w-]+ )?--(\w[\w-]*)(?:\s+<([\w-]+)>)?"(.*)$/,
+      /^\s*(?:#|\/\/)USAGE flag "(-[\w-]+ )?--(\w[\w-]*)(?:\s+<([\w-]+)>)?"(.*)$/,
     );
     if (flagMatch) {
       const shortFlag = flagMatch[1]?.trim();
@@ -107,7 +111,7 @@ function parseTaskFile(filepath: string, name: string): MiseCommand {
       continue;
     }
 
-    const argMatch = line.match(/#USAGE arg "([<\[])([\w-]+)([>\]])"(.*)$/);
+    const argMatch = line.match(/^\s*(?:#|\/\/)USAGE arg "([<\[])([\w-]+)([>\]])"(.*)$/);
     if (argMatch) {
       const attrs = parseUsageAttrs(argMatch[4] || "");
       args.push({
@@ -133,7 +137,7 @@ function walkTasks(dir: string, prefix: string): MiseCommand[] {
 
     if (entry.isDirectory()) {
       results.push(...walkTasks(fullPath, taskName));
-    } else {
+    } else if (entry.isFile() && isExecutableFile(fullPath)) {
       results.push(parseTaskFile(fullPath, taskName));
     }
   }
@@ -159,10 +163,28 @@ export function parseTasks(taskDir: string): MiseCommand[] {
  * Returns the total `count` and the list of `.bats` `files` found.
  * Returns `{ count: 0, files: [] }` if the directory does not exist.
  */
+function walkBatsFiles(dir: string, prefix = ""): string[] {
+  const files: string[] = [];
+
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name.startsWith(".")) continue;
+    const relPath = prefix ? `${prefix}/${entry.name}` : entry.name;
+    const fullPath = join(dir, entry.name);
+
+    if (entry.isDirectory()) {
+      files.push(...walkBatsFiles(fullPath, relPath));
+    } else if (entry.isFile() && entry.name.endsWith(".bats")) {
+      files.push(relPath);
+    }
+  }
+
+  return files;
+}
+
 export function countBatsTests(testDir: string): BatsTestCount {
   if (!existsSync(testDir)) return { count: 0, files: [] };
 
-  const files = readdirSync(testDir).filter((f) => f.endsWith(".bats"));
+  const files = walkBatsFiles(testDir).sort();
   const count = files.reduce((total, file) => {
     const src = readFileSync(join(testDir, file), "utf-8");
     return total + (src.match(/@test "/g)?.length ?? 0);
