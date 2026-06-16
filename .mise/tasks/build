@@ -91,7 +91,14 @@ if [[ "${usage_check}" == "true" ]]; then
   exit 0
 fi
 
-# Write output
+# Write output, but skip the rewrite when the rendered content already matches.
+# This is a content-aware cache (not mtime-based): it avoids needless writes and
+# mtime churn without ever masking a stale file, and works for any resolved
+# output path (default README.md, auto-mapped --file output, or explicit --output).
 mkdir -p "$(dirname "$OUT_FILE")"
-echo "$output" > "$OUT_FILE"
-echo "Generated $(basename "$OUT_FILE")"
+if [[ -f "$OUT_FILE" ]] && diff -q "$OUT_FILE" <(echo "$output") > /dev/null 2>&1; then
+  echo "$(basename "$OUT_FILE") already up to date"
+else
+  echo "$output" > "$OUT_FILE"
+  echo "Generated $(basename "$OUT_FILE")"
+fi
