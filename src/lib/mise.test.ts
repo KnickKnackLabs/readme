@@ -1,5 +1,5 @@
 import { expect, test, describe, beforeEach, afterEach } from "bun:test";
-import { mkdtemp, mkdir, writeFile, rm } from "fs/promises";
+import { mkdtemp, mkdir, writeFile, rm, chmod } from "fs/promises";
 import { join } from "path";
 import { tmpdir } from "os";
 
@@ -16,10 +16,13 @@ describe("parseTasks", () => {
     await rm(dir, { recursive: true, force: true });
   });
 
-  const task = async (rel: string, body: string) => {
+  const task = async (rel: string, body: string, opts: { executable?: boolean } = {}) => {
     const full = join(dir, rel);
     await mkdir(join(full, ".."), { recursive: true });
     await writeFile(full, body);
+    if (opts.executable !== false) {
+      await chmod(full, 0o755);
+    }
   };
 
   test("parses description, a boolean flag, and a valued flag with short/required/default", async () => {
@@ -66,6 +69,30 @@ set -e
     ]);
   });
 
+  test("parses TypeScript-style //MISE and //USAGE headers", async () => {
+    await task(
+      "docs",
+      `#!/usr/bin/env bun
+//MISE description="Generate docs"
+//USAGE flag "--name <name>" help="Project name" default="readme"
+//USAGE arg "[target]" help="Target directory"
+`,
+    );
+
+    const [cmd] = parseTasks(dir);
+    expect(cmd.description).toBe("Generate docs");
+    expect(cmd.flags).toEqual([
+      {
+        name: "--name",
+        valueName: "name",
+        help: "Project name",
+        default: "readme",
+        isBoolean: false,
+      },
+    ]);
+    expect(cmd.args).toEqual([{ name: "target", help: "Target directory", optional: true }]);
+  });
+
   test("walks nested dirs into ':'-joined names", async () => {
     await task("pre-commit/install", `#MISE description="Install hook"\n`);
     await task("pre-commit/remove", `#MISE description="Remove hook"\n`);
@@ -75,11 +102,12 @@ set -e
     expect(names).toContain("pre-commit:remove");
   });
 
-  test("excludes hidden tasks and dot/underscore-prefixed entries", async () => {
+  test("excludes hidden tasks, helpers, and dot/underscore-prefixed entries", async () => {
     await task("visible", `#MISE description="Shown"\n`);
     await task("secret", `#MISE description="Nope"\n#MISE hide=true\n`);
     await task("_helper", `#MISE description="Helper"\n`);
     await task(".dotfile", `#MISE description="Dotfile"\n`);
+    await task("lib.sh", `#MISE description="Sourced helper"\n`, { executable: false });
 
     const names = parseTasks(dir).map((c) => c.name);
     expect(names).toEqual(["visible"]);
@@ -119,17 +147,18 @@ describe("countBatsTests", () => {
     await rm(dir, { recursive: true, force: true });
   });
 
-  test("counts @test across multiple .bats files and lists only .bats", async () => {
+  test("counts @test across nested .bats files and lists only .bats", async () => {
+    await mkdir(join(dir, "nested"), { recursive: true });
     await writeFile(
       join(dir, "a.bats"),
       `@test "one" {\n  true\n}\n@test "two" {\n  true\n}\n`,
     );
-    await writeFile(join(dir, "b.bats"), `@test "three" {\n  true\n}\n`);
+    await writeFile(join(dir, "nested", "b.bats"), `@test "three" {\n  true\n}\n`);
     await writeFile(join(dir, "helpers.bash"), `@test "not counted" {}\n`);
 
     const { count, files } = countBatsTests(dir);
     expect(count).toBe(3);
-    expect(files.sort()).toEqual(["a.bats", "b.bats"]);
+    expect(files).toEqual(["a.bats", "nested/b.bats"]);
   });
 
   test("returns zero for a missing directory", () => {
