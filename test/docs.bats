@@ -17,7 +17,7 @@ TASK
 }
 
 mtime() {
-  stat -f "%m" "$1" 2>/dev/null || stat -c "%Y" "$1"
+  stat -c "%Y" "$1" 2>/dev/null || stat -f "%m" "$1"
 }
 
 @test "docs requires README_CALLER_PWD even when mise -C runs from the package" {
