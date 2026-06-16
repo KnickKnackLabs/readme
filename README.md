@@ -30,7 +30,7 @@ shiv install KnickKnackLabs/readme
 Create a `README.tsx` in your project root:
 
 ```tsx
-import { Heading, Paragraph, Bold, Section, CodeBlock } from "./src/components";
+import { Heading, Paragraph, Bold, Section, CodeBlock } from "readme";
 
 const readme = (
   <>
@@ -53,7 +53,26 @@ readme build              # README.tsx → README.md
 readme build --check      # Exit 1 if README.md is stale (for CI)
 ```
 
-## Components (35)
+## GitHub Action
+
+Use the composite action to keep generated READMEs honest in CI:
+
+```yaml
+- uses: KnickKnackLabs/readme@v0.3.1
+  with:
+    check: true
+```
+
+For READMEs outside the workspace root, set `working-directory` to the directory containing `README.tsx`:
+
+```yaml
+- uses: KnickKnackLabs/readme@v0.3.1
+  with:
+    check: true
+    working-directory: docs
+```
+
+## Components (39)
 
 Auto-generated from `src/components/` exports. Each component carries a `.meta` property describing its usage.
 
@@ -62,6 +81,7 @@ Auto-generated from `src/components/` exports. Each component carries a `.meta` 
 | `<Alert type="WARNING">text</Alert>` | &gt; [!WARNING]
 &gt; text |
 | `<Align align="center">...</Align>` | &lt;p align="..."&gt; |
+| `<Anchor id="section">text</Anchor>` | [text](#section) |
 | `<Badge label=... value=... />` | shields.io badge |
 | `<Badges>...</Badges>` | Badge row with spacing |
 | `<Blockquote>text</Blockquote>` | &gt; text |
@@ -88,8 +108,11 @@ Auto-generated from `src/components/` exports. Each component carries a `.meta` 
 &gt; Hello! |
 | `<Paragraph>Text</Paragraph>` | Text with trailing blank line |
 | `<Raw>html</Raw>` | HTML passthrough |
+| `<Rule premises={["A"]} conclusion="B" name="MyRule" />` | ```math block with \frac{A}{B} \text{ (MyRule)} |
+| `<RuleSet title="Rules"><Rule ... /></RuleSet>` | Optional heading followed by grouped Rule blocks |
 | `<Section title=... level=...>` | Heading + content block |
 | `<Sub>text</Sub>` | &lt;sub&gt; tag |
+| `<TOC headings={[{ text: "Usage", level: 2 }]} />` | Nested heading links; pass id for exact anchors |
 | `<Table>...</Table>` | GFM table (Prettier-compatible padding) |
 | `<TableHead><Cell>...</Cell></TableHead>` | Header row + separator |
 | `<TableRow><Cell>...</Cell></TableRow>` | Table data row |
@@ -109,7 +132,7 @@ Auto-generated from `src/components/` exports. Each component carries a `.meta` 
 ```bash
 git clone https://github.com/KnickKnackLabs/readme.git
 cd readme && mise trust && mise install
-mise run build
+README_CALLER_PWD="$PWD" mise run build
 ```
 
 This README is itself generated from `README.tsx` — dogfooding all the way down.
