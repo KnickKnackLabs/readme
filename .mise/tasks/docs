@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+#MISE description="Generate docs/index.html command reference from .mise/tasks"
+#USAGE flag "--name <text>" help="Project display name (default: target dir basename)" default=""
+#USAGE flag "--tagline <text>" help="One-line project tagline" default=""
+#USAGE flag "--repo <url>" help="GitHub repo URL (default: from git remote)" default=""
+set -e
+
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+
+if [[ -z "${README_CALLER_PWD:-}" ]]; then
+  echo "Error: README_CALLER_PWD is not set." >&2
+  echo "readme docs must be run through the installed readme shim, or with" >&2
+  echo "README_CALLER_PWD set to the target project directory, e.g.:" >&2
+  echo "  README_CALLER_PWD=\"\$PWD\" mise -C \"$REPO_DIR\" run docs" >&2
+  exit 1
+fi
+
+TARGET_DIR="$README_CALLER_PWD"
+OUTPUT_FILE="$TARGET_DIR/docs/index.html"
+
+if [[ ! -d "$TARGET_DIR/.mise/tasks" ]]; then
+  echo "No .mise/tasks found in $TARGET_DIR — nothing to document."
+  exit 0
+fi
+
+# Bun's --tsconfig-override handles paths resolution only
+TSCONFIG=$(mktemp)
+cat > "$TSCONFIG" <<CONF
+{
+  "compilerOptions": {
+    "paths": {
+      "jsx-md/jsx-runtime": ["$REPO_DIR/src/jsx-runtime.ts"],
+      "jsx-md/jsx-dev-runtime": ["$REPO_DIR/src/jsx-dev-runtime.ts"],
+      "readme": ["$REPO_DIR/index.ts"],
+      "readme/*": ["$REPO_DIR/*"]
+    }
+  }
+}
+CONF
+trap 'rm -f "$TSCONFIG"' EXIT
+
+# Pass task flags as env vars for the generator script
+if [[ -n "${usage_name:-}" ]]; then
+  export DOCS_NAME="$usage_name"
+fi
+
+if [[ -n "${usage_tagline:-}" ]]; then
+  export DOCS_TAGLINE="$usage_tagline"
+fi
+
+if [[ -n "${usage_repo:-}" ]]; then
+  export DOCS_REPO_URL="$usage_repo"
+fi
+
+export README_CALLER_PWD
+
+output=$(bun run --tsconfig-override "$TSCONFIG" "$REPO_DIR/src/docs-generate.ts" 2> >(grep -v "Internal error: directory mismatch" >&2))
+
+# Content-aware write: only rewrite if the content differs (per #15)
+mkdir -p "$(dirname "$OUTPUT_FILE")"
+if [[ -f "$OUTPUT_FILE" ]]; then
+  existing=$(cat "$OUTPUT_FILE")
+  if [[ "$existing" == "$output" ]]; then
+    echo "docs/index.html already up to date."
+    exit 0
+  fi
+fi
+
+echo "$output" > "$OUTPUT_FILE"
+echo "Generated docs/index.html"

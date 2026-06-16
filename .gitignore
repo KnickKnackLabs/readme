@@ -1,0 +1,4 @@
+# Local pi agent context (not upstream)
+AGENTS.md
+.pi/
+.piac/
