@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #MISE description="Generate README.md from README.tsx"
-#USAGE flag "--check" help="Check if README.md is up to date (exit 1 if stale)"
+#USAGE flag "--check" help="Check if README.md is up to date (exit 1 if stale)" default=#false
 set -e
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -60,6 +60,15 @@ if [[ "${usage_check}" == "true" ]]; then
   exit 0
 fi
 
-# Write output
-echo "$output" > "$TARGET_DIR/README.md"
-echo "Generated README.md"
+# Write output, but skip the rewrite when the rendered content already matches.
+# This is a content-aware cache (not mtime-based): it avoids needless writes and
+# mtime churn without ever masking a stale file, and works for any target dir
+# (cross-repo callers included). Caching is kept inside the task — never as mise
+# #MISE sources/outputs — so `--check` above always compares content and can
+# never be skipped on timestamps.
+if [[ -f "$TARGET_DIR/README.md" ]] && diff -q "$TARGET_DIR/README.md" <(echo "$output") > /dev/null 2>&1; then
+  echo "README.md already up to date"
+else
+  echo "$output" > "$TARGET_DIR/README.md"
+  echo "Generated README.md"
+fi
