@@ -26,6 +26,20 @@ const componentRows = Object.entries(allComponents)
     return { name, usage: name, output: "⚠️ undocumented" };
   });
 
+// Count lint rules from mise.toml's [_.codebase] lint list for the lints badge.
+function countLints(): number {
+  try {
+    const toml = readFileSync(new URL("../mise.toml", import.meta.url), "utf-8");
+    const inSection = toml.match(/\[_\.codebase\]\s*\n([\s\S]*?)(?=\n\[|$)/);
+    if (!inSection) return 0;
+    const lintMatch = inSection[1].match(/lint\s*=\s*\[([\s\S]*?)\]/);
+    if (!lintMatch) return 0;
+    return lintMatch[1].split(",").filter(s => s.trim()).length;
+  } catch {
+    return 0;
+  }
+}
+
 const readme = (
   <>
     <Center>
@@ -44,6 +58,7 @@ const readme = (
         <Badge label="runtime" value="Bun" color="f472b6" logo="bun" logoColor="white" href="https://bun.sh" />
         <Badge label="output" value="GitHub Flavored Markdown" color="blue" />
         <Badge label="License" value="MIT" color="blue" href="LICENSE" />
+        <Badge label="lints" value={String(countLints())} color="0ea5e9" />
       </Badges>
     </Center>
 
@@ -150,6 +165,18 @@ README_CALLER_PWD="$PWD" mise run build`}</CodeBlock>
       <Paragraph>
         This README is itself generated from <Code>README.tsx</Code> — dogfooding all the way down.
       </Paragraph>
+    </Section>
+
+    <Section title="Validation">
+      <Paragraph>
+        Before merging, run the full validation suite:
+      </Paragraph>
+
+      <CodeBlock lang="bash">{`mise run test
+codebase lint "$PWD"
+readme build --check
+git diff --check
+mise run doctor`}</CodeBlock>
     </Section>
 
     <Center>

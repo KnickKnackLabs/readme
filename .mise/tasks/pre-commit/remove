@@ -2,7 +2,7 @@
 #MISE description="Remove the readme pre-commit hook"
 set -e
 
-TARGET_DIR="${CALLER_PWD:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}"
+TARGET_DIR="${README_CALLER_PWD:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}"
 
 HOOK_DIR=$(git -C "$TARGET_DIR" rev-parse --absolute-git-dir 2>/dev/null)/hooks || {
   echo "Error: not a git repository" >&2
@@ -28,7 +28,9 @@ awk "
 " "$HOOK_FILE" > "$tmp"
 
 # If only the shebang (or nothing) remains, remove the file entirely
-content=$(grep -v '^[[:space:]]*$' "$tmp" || true)
+if ! content=$(grep -v '^[[:space:]]*$' "$tmp"); then
+  content=""
+fi
 if [ -z "$content" ] || [ "$content" = "#!/usr/bin/env bash" ]; then
   rm "$HOOK_FILE"
   rm "$tmp"
