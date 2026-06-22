@@ -8,6 +8,9 @@ usage = "1"
 # ── Add repo-specific tools below ──
 bun = "1"
 
+# ── CI tools (installed via shiv) ──
+"shiv:codebase" = "latest"
+
 [settings]
 quiet = true
 task_output = "interleave"

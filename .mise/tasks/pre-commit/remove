@@ -28,7 +28,9 @@ awk "
 " "$HOOK_FILE" > "$tmp"
 
 # If only the shebang (or nothing) remains, remove the file entirely
-content=$(grep -v '^[[:space:]]*$' "$tmp" || true)
+if ! content=$(grep -v '^[[:space:]]*$' "$tmp"); then
+  content=""
+fi
 if [ -z "$content" ] || [ "$content" = "#!/usr/bin/env bash" ]; then
   rm "$HOOK_FILE"
   rm "$tmp"

@@ -21,12 +21,12 @@ setup() {
 run_install() {
   local build="${1:-false}"
   local check="${2:-false}"
-  README_CALLER_PWD="$TEST_REPO" usage_build="$build" usage_check="$check" bash "$INSTALL_TASK" 2>&1
+  README_CALLER_PWD="$TEST_REPO" usage_build="$build" usage_check="$check" mise -C "$REPO_DIR" run -q pre-commit:install 2>&1
 }
 
 # Helper: run remove task targeting the test repo
 run_remove() {
-  README_CALLER_PWD="$TEST_REPO" bash "$REMOVE_TASK" 2>&1
+  README_CALLER_PWD="$TEST_REPO" mise -C "$REPO_DIR" run -q pre-commit:remove 2>&1
 }
 
 hook_file() {

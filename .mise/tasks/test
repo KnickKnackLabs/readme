@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 #MISE description="Run test suite"
+#USAGE arg "[args]..." var=#true help="Extra args forwarded to bun test and bats"
+#USAGE example "*"         help="Run all tests"
+#USAGE example "src/"      help="Run only Bun component tests"
+#USAGE example "test/"     help="Run only BATS tests"
 set -e
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-bun test "$REPO_DIR/src"
-bats "$REPO_DIR/test"
+
+# Run both test suites. Extra args filter by file path.
+bun test "$REPO_DIR/src" "$@"
+bats "$REPO_DIR/test" "$@"
