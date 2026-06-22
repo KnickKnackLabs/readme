@@ -2,7 +2,7 @@
 #MISE description="Remove the readme pre-commit hook"
 set -e
 
-TARGET_DIR="${CALLER_PWD:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}"
+TARGET_DIR="${README_CALLER_PWD:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}"
 
 HOOK_DIR=$(git -C "$TARGET_DIR" rev-parse --absolute-git-dir 2>/dev/null)/hooks || {
   echo "Error: not a git repository" >&2

@@ -10,6 +10,7 @@ Build it to markdown. Keep it honest in CI.
 [![runtime: Bun](https://img.shields.io/badge/runtime-Bun-f472b6?style=flat&logo=bun&logoColor=white)](https://bun.sh)
 ![output: GitHub Flavored Markdown](https://img.shields.io/badge/output-GitHub%20Flavored%20Markdown-blue?style=flat)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=flat)](LICENSE)
+![lints: 0](https://img.shields.io/badge/lints-0-0ea5e9?style=flat)
 
 </div>
 
@@ -136,6 +137,18 @@ README_CALLER_PWD="$PWD" mise run build
 ```
 
 This README is itself generated from `README.tsx` — dogfooding all the way down.
+
+## Validation
+
+Before merging, run the full validation suite:
+
+```bash
+mise run test
+codebase lint "$PWD"
+readme build --check
+git diff --check
+mise run doctor
+```
 
 <div align="center">
 
