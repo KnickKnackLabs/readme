@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+BUN="${BUN:-bun}"
+BATS="${BATS:-bats}"
+
+run_bun() {
+  "$BUN" test "$REPO_DIR/src" "$@"
+}
+
+run_bats() {
+  target="$REPO_DIR/test"
+
+  if [ "$#" -gt 0 ] && [[ "$1" != -* ]]; then
+    if [[ "$1" != *.bats && -f "$REPO_DIR/test/$1.bats" ]]; then
+      target="$REPO_DIR/test/$1.bats"
+      shift
+    elif [[ "$1" == *.bats || -d "$1" ]]; then
+      target="$1"
+      shift
+    fi
+  fi
+
+  "$BATS" "$@" "$target"
+}
+
+case "${1:-all}" in
+  all)
+    [ "$#" -eq 0 ] || {
+      printf 'test: the all suite does not accept arguments; choose bun or bats\n' >&2
+      exit 2
+    }
+    run_bun
+    run_bats
+    ;;
+  bun)
+    shift
+    run_bun "$@"
+    ;;
+  bats)
+    shift
+    run_bats "$@"
+    ;;
+  *)
+    printf 'test: unknown suite %q; expected bun or bats\n' "$1" >&2
+    exit 2
+    ;;
+esac

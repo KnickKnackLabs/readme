@@ -1,3 +1,24 @@
+[settings]
+quiet = true
+task_output = "interleave"
+experimental = true
+
+[plugins]
+shiv = "https://github.com/KnickKnackLabs/vfox-shiv"
+
 [tools]
 bun = "1"
-bats = "1"
+bats = "1.13.0"
+"shiv:codebase" = "0.4"
+
+[_.codebase]
+name = "readme"
+lint = [
+  "mise-settings",
+  "bats-test-helper",
+  "mcr-scope",
+  "or-true",
+  "shellcheck",
+  "caller-pwd-contract",
+  "github-actions",
+]

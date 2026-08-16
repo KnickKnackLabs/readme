@@ -83,7 +83,7 @@ if [[ "${usage_check}" == "true" ]]; then
   if ! diff -u "$OUT_FILE" <(echo "$output") > /dev/null 2>&1; then
     echo "$(basename "$OUT_FILE") is out of date. Run 'readme build' to update it."
     echo ""
-    diff -u "$OUT_FILE" <(echo "$output") || true
+    if ! diff -u "$OUT_FILE" <(echo "$output"); then :; fi
     exit 1
   fi
 
