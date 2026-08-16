@@ -1,7 +1,17 @@
 #!/usr/bin/env bash
-#MISE description="Run test suite"
-set -e
+#MISE description="Run Bun and BATS tests"
+#USAGE arg "[args]" default="" var=#true help="Optional suite (bun or bats), followed by suite arguments"
+#USAGE example "mise run test" header="Run both suites"
+#USAGE example "mise run test bun" header="Run Bun tests"
+#USAGE example "mise run test bats pre-commit" header="Run one BATS suite"
+#USAGE example "mise run test bats --filter lifecycle" header="Filter BATS tests by name"
+set -euo pipefail
 
-REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-bun test "$REPO_DIR/src"
-bats "$REPO_DIR/test"
+args=()
+if [ -n "${usage_args:-}" ]; then
+  while IFS= read -r argument; do
+    [ -z "$argument" ] || args+=("$argument")
+  done < <(printf '%s' "$usage_args" | xargs printf '%s\n')
+fi
+
+exec "$MISE_CONFIG_ROOT/libexec/test" ${args[@]+"${args[@]}"}

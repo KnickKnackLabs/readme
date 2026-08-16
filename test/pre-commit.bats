@@ -2,8 +2,6 @@
 # readme pre-commit hook test suite
 
 REPO_DIR="$BATS_TEST_DIRNAME/.."
-INSTALL_TASK="$REPO_DIR/.mise/tasks/pre-commit/install"
-REMOVE_TASK="$REPO_DIR/.mise/tasks/pre-commit/remove"
 
 setup() {
   # Create a temporary git repo to test in
@@ -21,12 +19,17 @@ setup() {
 run_install() {
   local build="${1:-false}"
   local check="${2:-false}"
-  CALLER_PWD="$TEST_REPO" usage_build="$build" usage_check="$check" bash "$INSTALL_TASK" 2>&1
+  local args=()
+
+  [ "$build" = "true" ] && args+=(--build)
+  [ "$check" = "true" ] && args+=(--check)
+
+  README_CALLER_PWD="$TEST_REPO" mise -C "$REPO_DIR" run pre-commit:install ${args[@]+"${args[@]}"} 2>&1
 }
 
 # Helper: run remove task targeting the test repo
 run_remove() {
-  CALLER_PWD="$TEST_REPO" bash "$REMOVE_TASK" 2>&1
+  README_CALLER_PWD="$TEST_REPO" mise -C "$REPO_DIR" run pre-commit:remove 2>&1
 }
 
 hook_file() {

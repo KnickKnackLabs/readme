@@ -4,7 +4,7 @@
 #USAGE flag "--check" help="Error if README.md is stale on commit"
 set -e
 
-TARGET_DIR="${CALLER_PWD:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}"
+TARGET_DIR="${README_CALLER_PWD:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}"
 BUILD="${usage_build:-false}"
 CHECK="${usage_check:-false}"
 

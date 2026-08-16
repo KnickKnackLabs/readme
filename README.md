@@ -137,6 +137,19 @@ README_CALLER_PWD="$PWD" mise run build
 
 This README is itself generated from `README.tsx` — dogfooding all the way down.
 
+## Validation
+
+Run both test systems, convention lints, and the generated-output check before merging:
+
+```bash
+mise run test
+codebase lint "$PWD"
+README_CALLER_PWD="$PWD" mise run build --check
+README_CALLER_PWD="$PWD" mise run docs
+git diff --exit-code -- docs/index.html
+git diff --check
+```
+
 <div align="center">
 
 ## License

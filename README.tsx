@@ -152,6 +152,19 @@ README_CALLER_PWD="$PWD" mise run build`}</CodeBlock>
       </Paragraph>
     </Section>
 
+    <Section title="Validation">
+      <Paragraph>
+        Run both test systems, convention lints, and the generated-output check before merging:
+      </Paragraph>
+
+      <CodeBlock lang="bash">{`mise run test
+codebase lint "$PWD"
+README_CALLER_PWD="$PWD" mise run build --check
+README_CALLER_PWD="$PWD" mise run docs
+git diff --exit-code -- docs/index.html
+git diff --check`}</CodeBlock>
+    </Section>
+
     <Center>
       <Section title="License">
         <Paragraph>MIT</Paragraph>
