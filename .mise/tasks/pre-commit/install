@@ -2,6 +2,8 @@
 #MISE description="Install a git pre-commit hook that keeps README.md in sync"
 #USAGE flag "--build" help="Auto-rebuild and stage README.md on commit"
 #USAGE flag "--check" help="Error if README.md is stale on commit"
+#USAGE example "readme pre-commit:install --build" header="Rebuild and stage README.md before commits"
+#USAGE example "readme pre-commit:install --check" header="Reject commits with stale README.md"
 set -e
 
 TARGET_DIR="${README_CALLER_PWD:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}"
