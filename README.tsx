@@ -154,10 +154,13 @@ README_CALLER_PWD="$PWD" mise run build`}</CodeBlock>
 
     <Section title="Validation">
       <Paragraph>
-        Run both test systems, convention lints, and the generated-output check before merging:
+        Run both test systems, convention lints, and the generated-output check before merging.
+        The BATS side uses the KKL fork and Rush with four isolated jobs across and within files;
+        use the explicit serial path for debugging.
       </Paragraph>
 
       <CodeBlock lang="bash">{`mise run test
+mise run test bats --jobs 1
 codebase lint "$PWD"
 README_CALLER_PWD="$PWD" mise run build --check
 README_CALLER_PWD="$PWD" mise run docs

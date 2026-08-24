@@ -1,11 +1,12 @@
 #!/usr/bin/env bats
 # readme pre-commit hook test suite
 
-REPO_DIR="$BATS_TEST_DIRNAME/.."
+load test_helper
 
 setup() {
   # Create a temporary git repo to test in
   export TEST_REPO="$BATS_TEST_TMPDIR/project"
+  export README_CALLER_PWD="$TEST_REPO"
   mkdir -p "$TEST_REPO"
   git -C "$TEST_REPO" init -q -b main
   git -C "$TEST_REPO" config user.email "test@test.com"
@@ -24,12 +25,12 @@ run_install() {
   [ "$build" = "true" ] && args+=(--build)
   [ "$check" = "true" ] && args+=(--check)
 
-  README_CALLER_PWD="$TEST_REPO" mise -C "$REPO_DIR" run pre-commit:install ${args[@]+"${args[@]}"} 2>&1
+  readme pre-commit:install ${args[@]+"${args[@]}"} 2>&1
 }
 
 # Helper: run remove task targeting the test repo
 run_remove() {
-  README_CALLER_PWD="$TEST_REPO" mise -C "$REPO_DIR" run pre-commit:remove 2>&1
+  readme pre-commit:remove 2>&1
 }
 
 hook_file() {
@@ -42,10 +43,10 @@ hook_file() {
 setup_readme_on_path() {
   local mock_bin="$BATS_TEST_TMPDIR/mock-bin"
   mkdir -p "$mock_bin"
-  cat > "$mock_bin/readme" <<MOCK
+  cat > "$mock_bin/readme" <<'MOCK'
 #!/usr/bin/env bash
-export README_CALLER_PWD="\$PWD"
-exec mise -C "$REPO_DIR" run -q "\$@"
+export README_CALLER_PWD="$PWD"
+readme "$@"
 MOCK
   chmod +x "$mock_bin/readme"
   export PATH="$mock_bin:$PATH"
