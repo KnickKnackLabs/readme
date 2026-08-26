@@ -1,79 +1,37 @@
 #!/usr/bin/env bash
 #MISE description="Run Bun and BATS tests"
+#MISE dir="{{config_root}}"
 #USAGE arg "[args]" default="" var=#true help="Optional suite (bun or bats), followed by suite arguments"
 #USAGE example "mise run test" header="Run both suites"
 #USAGE example "mise run test bun" header="Run Bun tests"
-#USAGE example "mise run test bats pre-commit" header="Run one BATS suite"
+#USAGE example "mise run test bats test/pre-commit.bats" header="Run one BATS suite"
 #USAGE example "mise run test bats --filter lifecycle" header="Filter BATS tests by name"
 #USAGE example "mise run test bats --jobs 1" header="Run BATS serially for debugging"
 set -euo pipefail
 
-REPO_DIR="$MISE_CONFIG_ROOT"
-BUN="${BUN:-bun}"
-
-args=()
-if [ -n "${usage_args:-}" ]; then
-  while IFS= read -r argument; do
-    [ -z "$argument" ] || args+=("$argument")
-  done < <(printf '%s' "$usage_args" | xargs printf '%s\n')
-fi
-
-run_bun() {
-  "$BUN" test "$REPO_DIR/src" "$@"
-}
-
-run_bats() {
-  local target="$REPO_DIR/test"
-  local argument
-  local has_jobs=false
-  local bats_args=()
-
-  if [ "$#" -gt 0 ] && [[ "$1" != -* ]]; then
-    if [[ "$1" != *.bats && -f "$REPO_DIR/test/$1.bats" ]]; then
-      target="$REPO_DIR/test/$1.bats"
-      shift
-    elif [[ "$1" == *.bats || -d "$1" ]]; then
-      target="$1"
-      shift
-    fi
-  fi
-
-  for argument in "$@"; do
-    case "$argument" in
-      -j|--jobs|--jobs=*) has_jobs=true ;;
-    esac
-  done
-
-  if $has_jobs; then
-    bats_args=("$@" "$target")
-  else
-    bats_args=(--jobs 4 --parallel-binary-name rush "$@" "$target")
-  fi
-
-  if [ -n "${BATS_COMMAND:-}" ]; then
-    "$BATS_COMMAND" ${bats_args[@]+"${bats_args[@]}"}
-  else
-    bats ${bats_args[@]+"${bats_args[@]}"}
-  fi
-}
-
-case "${args[0]:-all}" in
+case "${1:-all}" in
   all)
-    [ "${#args[@]}" -eq 0 ] || {
+    [ "$#" -eq 0 ] || {
       printf 'test: the all suite does not accept arguments; choose bun or bats\n' >&2
       exit 2
     }
-    run_bun
-    run_bats
+    bun test "$MISE_CONFIG_ROOT/src"
     ;;
   bun)
-    run_bun ${args[@]+"${args[@]:1}"}
+    shift
+    exec bun test "$MISE_CONFIG_ROOT/src" "$@"
     ;;
   bats)
-    run_bats ${args[@]+"${args[@]:1}"}
+    shift
     ;;
   *)
-    printf 'test: unknown suite %q; expected bun or bats\n' "${args[0]}" >&2
+    printf 'test: unknown suite %q; expected bun or bats\n' "$1" >&2
     exit 2
     ;;
 esac
+
+export BATS_DEFAULT_TEST_TARGET="$MISE_CONFIG_ROOT/test"
+export BATS_NUMBER_OF_PARALLEL_JOBS="${BATS_NUMBER_OF_PARALLEL_JOBS:-4}"
+export BATS_PARALLEL_BINARY_NAME="${BATS_PARALLEL_BINARY_NAME:-rush}"
+
+exec bats --print-output-on-failure "$@"
