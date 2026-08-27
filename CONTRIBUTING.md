@@ -30,16 +30,17 @@ During iteration, select one system or one BATS suite explicitly:
 
 ```bash
 mise run test bun
-mise run test bats pre-commit
+mise run test bats test/pre-commit.bats
 mise run test bats --filter lifecycle
 mise run test bats --jobs 1
 ```
 
-The BATS side uses the KKL fork and Rush with a four-job default across and
-within files. Every mutable fixture belongs under the current test's
+The BATS side uses the KKL fork's default-target interface and Rush with a
+four-job default across and within files. Explicit BATS targets and options pass
+through unchanged. Every mutable fixture belongs under the current test's
 `$BATS_TEST_TMPDIR`; keep `--jobs 1` as the explicit serial debugging path.
-The maintained public runner owns the complete Bun/BATS selection and argument
-forwarding contract.
+The maintained public runner owns Bun/BATS selection while BATS owns target and
+option parsing.
 
 Before merge, also run the configured convention lints and verify generated output:
 
